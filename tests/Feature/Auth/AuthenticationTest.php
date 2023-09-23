@@ -3,9 +3,11 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Inertia\Testing\AssertableInertia as Assert;
+
 
 class AuthenticationTest extends TestCase
 {
@@ -13,32 +15,64 @@ class AuthenticationTest extends TestCase
 
     public function test_login_screen_can_be_rendered(): void
     {
-        $response = $this->get('/login');
-
-        $response->assertStatus(200);
+        $this->get('/login')
+            ->assertInertia(fn(Assert $page) => $page->component('Auth/Login'));
     }
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    public function test_users_can_not_authenticate_with_invalid_mobile()
     {
-        $user = User::factory()->create();
-
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
-
-        $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $this->post('/login', [
+            'mobile' => "123465",
+        ])->assertInvalid(["mobile" => __("auth.wrong_number")]);
     }
 
-    public function test_users_can_not_authenticate_with_invalid_password(): void
+    public function test_users_can_request_for_otp(): void
     {
         $user = User::factory()->create();
 
         $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
+            'mobile' => $user->mobile,
+        ])->assertRedirect(route("verify", ["mobile" => $user->mobile]));
+    }
+
+    public function test_users_can_not_request_for_new_otp_less_than_2_minuets()
+    {
+
+        $this->post('/login', [
+            'mobile' => "+96878454640",
+        ])->assertRedirect(route("verify", ["mobile" => "+96878454640", "last_opt_request" => Carbon::now()]));
+        $user = User::where("mobile", "+96878454640")->first();
+        sleep(20);
+        $this->post('/login', [
+            'mobile' => $user->mobile,
+        ])->assertRedirect(route("verify", ["mobile" => $user->mobile, "last_opt_request" => $user->last_opt_request]));
+    }
+
+    public function test_users_can_request_for_new_otp_after_2_minuets()
+    {
+
+        $this->post('/login', [
+            'mobile' => "+96878454640",
+        ])->assertRedirect(route("verify", ["mobile" => "+96878454640", "last_opt_request" => Carbon::now()]));
+        $user = User::where("mobile", "+96878454640")->first();
+        sleep(121);
+        $this->post('/login', [
+            'mobile' => $user->mobile,
+        ])->assertRedirect(route("verify", ["mobile" => $user->mobile, "last_opt_request" => Carbon::now()]));
+    }
+
+    public function test_users_can_not_authenticate_with_invalid_otp(): void
+    {
+        $user = User::factory()->create();
+
+        $this->post('/login', [
+            'mobile' => $user->mobile,
+        ])->assertRedirect(route("verify", ["mobile" => $user->mobile]));
+
+        $response = $this->post('/verify', [
+            "mobile" => $user->mobile,
+            "code" => "123456"
+        ])->assertInvalid(["mobile" => __("auth.failed")]);
 
         $this->assertGuest();
     }

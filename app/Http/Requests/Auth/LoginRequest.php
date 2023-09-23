@@ -3,11 +3,13 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Twilio\Exceptions\TwilioException;
+use Twilio\Rest\Client;
 
 class LoginRequest extends FormRequest
 {
@@ -22,30 +24,30 @@ class LoginRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+     * @return array<string, Rule|array|string>
      */
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            'mobile' => ["required", "exists:users,mobile"],
+            'code' => ["required", "size:6"]
         ];
     }
 
     /**
      * Attempt to authenticate the request's credentials.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        if (!$this->checkOTP()) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'mobile' => trans('auth.failed'),
             ]);
         }
 
@@ -55,11 +57,11 @@ class LoginRequest extends FormRequest
     /**
      * Ensure the login request is not rate limited.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -68,7 +70,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'mobile' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -80,6 +82,33 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->input('mobile')) . '|' . $this->ip());
+    }
+
+    public function getMobile()
+    {
+        if (preg_match("/^((\+|00)?968)?([279]\d{7})$/", $this->mobile, $matches))
+            return $matches[3];
+    }
+
+    private function checkOTP()
+    {
+        try {
+            $sid = config("services.twilio.sid");
+            $token = config("services.twilio.token");
+            $serviceSid = config("services.twilio.serviceSid");
+            $twilio = new Client($sid, $token);
+            $result = $twilio->verify->v2->services($serviceSid)
+                ->verificationChecks
+                ->create([
+                        "to" => "+968" . $this->getMobile(),
+                        "code" => $this->code
+                    ]
+                );
+            return $result->valid;
+        } catch (TwilioException $exception) {
+            return false;
+        }
+
     }
 }
