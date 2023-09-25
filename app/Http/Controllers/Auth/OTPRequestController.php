@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OTPRequest;
+use App\Jobs\GetPatientTests;
 use App\Jobs\SendOTP;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -44,6 +44,7 @@ class OTPRequestController extends Controller
         }
 
         SendOTP::dispatch($user);
+        GetPatientTests::dispatch($user);
         return redirect()->route("verify", ["mobile" => $request->getMobile(), "last_otp_request" => Carbon::now()]);
     }
 }

@@ -11,7 +11,7 @@
         "inertiajs/inertia-laravel": "^0.6.3",
         "laravel/breeze": "^1.23",
         "laravel/framework": "^10.10",
-        "laravel/sanctum": "^3.2",
+        "laravel/sanctum": "^3.3",
         "laravel/telescope": "^4.16",
         "laravel/tinker": "^2.8",
         "telesign/telesign": "^1.1",
@@ -32,7 +32,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

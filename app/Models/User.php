@@ -33,4 +33,10 @@ class User extends Authenticatable
         'last_login' => 'datetime',
         'last_opt_request' => 'datetime',
     ];
+
+    public function Acceptances()
+    {
+        return $this->hasMany(Acceptance::class);
+    }
+
 }

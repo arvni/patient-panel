@@ -22,12 +22,10 @@ import Drawer from './Components/Drawer';
 import Copyright from './Components/Copyright';
 import Header from './Components/Header';
 import {Backdrop, CircularProgress} from "@mui/material";
+import VaccinesIcon from '@mui/icons-material/Vaccines';
 
+import logo from "@/../images/logo.png";
 
-const renderMenu = (item, index, permissions, handleVisit) => {
-    return (!item?.permission || permissions.includes(item.permission)) ?
-        <ListMenuItem key={index} permissions={permissions} onClick={handleVisit} {...item}/> : null
-}
 
 export default function Authenticated({auth, breadcrumbs, children, head}) {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -58,7 +56,13 @@ export default function Authenticated({auth, breadcrumbs, children, head}) {
             preserveState: true
         })
     };
-    const routes = [];
+    const routes = [
+        {
+            title: "Test List",
+            route: route("acceptances.index"),
+            icon: <VaccinesIcon/>
+        }
+    ];
     return (<>
             {head && <Head title={head}/>}
             <Box sx={{display: 'flex'}}>
@@ -124,14 +128,15 @@ export default function Authenticated({auth, breadcrumbs, children, head}) {
                             px: [1],
                         }}
                     >
-                        <h3>{(auth.user?.name ?? auth.user?.mobile).toUpperCase()}</h3>
+                        <img src={logo} alt="logo" height="50px"/>
                         <IconButton onClick={toggleDrawer}>
                             <ChevronLeftIcon/>
                         </IconButton>
                     </Toolbar>
                     <Divider/>
                     <List component="nav" sx={{maxHeight: "100%", overflowX: "hidden", overflowY: "auto"}}>
-                        {routes.map((item, index) => renderMenu(item, index, auth.permissions, handleVisit))}
+                        {routes.map((item, index) => <ListMenuItem key={index} permissions={auth.permissions}
+                                                                   onClick={handleVisit} {...item}/>)}
                     </List>
                 </Drawer>
                 <Box
