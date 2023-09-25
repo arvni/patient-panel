@@ -2,7 +2,9 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 import {
     Button,
     Collapse,
-    IconButton, Step, StepButton, Stepper,
+    Step,
+    StepButton,
+    Stepper,
     Table,
     TableBody,
     TableCell,
@@ -10,7 +12,6 @@ import {
     TableRow,
 } from "@mui/material";
 import {useState} from "react";
-import {KeyboardArrowRight, KeyboardArrowUp} from "@mui/icons-material";
 
 const Row = ({acceptanceItem, handleDownload}) => {
     const [open, setOpen] = useState(true);
@@ -33,25 +34,21 @@ const Row = ({acceptanceItem, handleDownload}) => {
         }
     ];
     const activeKey = [1, 2, 3, 4].filter(value => !Object.keys(acceptanceItem.timeline).includes(value + ""))[0];
+    const handleCollapse = () => setOpen(prevState => !prevState);
     return <>
         <TableRow key={"row-1-" + acceptanceItem.id}>
             <TableCell>
-                <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-                    {open ? <KeyboardArrowUp/> : <KeyboardArrowRight/>}
-                </IconButton>
-            </TableCell>
-            <TableCell>
-                {acceptanceItem.test}
+                <a href={"#"} onClick={handleCollapse}>{acceptanceItem.test}</a>
             </TableCell>
             <TableCell>
                 {acceptanceItem.status}
             </TableCell>
             <TableCell>
-                <Button onClick={handleDownload} disabled={acceptanceItem.status!=="reported"}>Download</Button>
+                <Button onClick={handleDownload} disabled={acceptanceItem.status !== "reported"}>Download</Button>
             </TableCell>
         </TableRow>
         <TableRow key={"row-2-" + acceptanceItem.id}>
-            <TableCell style={{paddingBottom: 0, paddingTop: 0}} colSpan={4}>
+            <TableCell style={{paddingBottom: 0, paddingTop: 0}} colSpan={3}>
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <Stepper nonLinear alternativeLabel sx={{marginTop: 1}}
                              activeStep={activeKey - 1}>
@@ -77,7 +74,6 @@ const Show = ({acceptance}) => {
     return <Table>
         <TableHead>
             <TableRow>
-                <TableCell>#</TableCell>
                 <TableCell>
                     Test Name
                 </TableCell>

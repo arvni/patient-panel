@@ -1,10 +1,5 @@
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemButton from "@mui/material/ListItemButton";
-import React, {useState} from "react";
-import {Avatar, Collapse} from "@mui/material";
-import {ExpandLess, ExpandMore} from "@mui/icons-material";
-import List from "@mui/material/List";
+import React from "react";
+import {ListItemIcon,ListItemText,ListItemButton,Badge} from "@mui/material";
 
 const listItemStyle = {
     "&.Mui-selected": {
@@ -25,47 +20,19 @@ const listItemStyle = {
     }
 };
 
-const renderListItems = (item, index, permissions, onClick) => {
-    if (item.hasOwnProperty("child") && permissions.includes(item.permission))
-        return <MenuItem key={index} permissions={permissions} onClick={onClick} {...item}/>
-    return permissions.includes(item.permission) ?
-        <ListItemButton key={index} sx={{pl: 4, listItemStyle}}
-                        selected={route().current(item.route)}
-                        href={refactorRoute(item.route)}
-                        onClick={onClick(refactorRoute(item.route))}>
-            <ListItemIcon sx={{minWidth: "35px"}}>
-                {item.icon}
-            </ListItemIcon>
-            <ListItemText primary={item.title}/>
-        </ListItemButton> : null;
-}
-
-const MenuItem = ({onClick, permissions, ...props}) => {
-    const [open, setOpen] = useState(false);
-    const handleClick = (route) => (e) => {
-        if (e) {
-            e.preventDefault();
-        }
-        if (route)
-            onClick(route)();
-        else
-            setOpen(!open);
+const MenuItem = ({onClick, selected, ...props}) => {
+    const handleOnClick = (href) => (e) => {
+        e.preventDefault();
+        onClick(href)();
     }
-    return <React.Fragment>
-        <ListItemButton {...props} sx={listItemStyle}
-                        onClick={handleClick(props.route)}
-                        href={props.route}>
-            <ListItemIcon sx={{minWidth: "60px"}}>
-                {props.icon ?? <Avatar variant={"square"} sx={{ width: 24, height: 24 ,fontSize:".75rem",backgroundColor:"white",color:"gray"}} >{props.title}</Avatar>}
-            </ListItemIcon>
-            <ListItemText primary={props.title}/>
-            {props.child && (open ? <ExpandLess/> : <ExpandMore/>)}
-        </ListItemButton>
-        {props.child && <Collapse in={open} timeout="auto" unmountOnExit>
-            <List component="div">
-                {props.child.map((item, index) => renderListItems(item, index, permissions, handleClick))}
-            </List>
-        </Collapse>}
-    </React.Fragment>;
+    return <ListItemButton {...props} sx={listItemStyle} onClick={handleOnClick(props.href)} href={route(props.href)}>
+
+        <ListItemIcon>
+            {props.badge ? <Badge color="primary" badgeContent={props.badge}>
+                {props.icon}
+            </Badge> : props.icon}
+        </ListItemIcon>
+        <ListItemText primary={props.title}/>
+    </ListItemButton>;
 }
 export default MenuItem;

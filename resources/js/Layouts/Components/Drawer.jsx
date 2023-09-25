@@ -1,7 +1,7 @@
 import { styled} from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 
-const drawerWidth = 260;
+const drawerWidth = 240;
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme, open }) => ({
@@ -20,9 +20,9 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
-          width: theme.spacing(7),
+          width: "56px",
           [theme.breakpoints.up('sm')]: {
-            width: theme.spacing(9),
+            width: "56px",
           },
         }),
       },

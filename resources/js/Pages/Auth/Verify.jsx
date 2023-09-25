@@ -6,8 +6,8 @@ import {CountdownCircleTimer} from 'react-countdown-circle-timer'
 import {useState} from "react";
 
 
-function Verify({mobile, ...props}) {
-    const {data, setData, post, processing, errors} = useForm({
+function Verify({mobile}) {
+    const {data, setData, post, processing, errors, setError, clearErrors} = useForm({
         code: '',
         mobile
     });
@@ -16,14 +16,27 @@ function Verify({mobile, ...props}) {
 
     const submit = (e) => {
         e.preventDefault();
-
-        post(route('verify'));
+        if (check())
+            post(route('verify'));
     };
+    const check = () => {
+        clearErrors()
+        let output = true;
+        if (!data.mobile || !/^/.test(data.mobile)) {
+            setError("mobile", "Please Enter a valid number")
+            output = false
+        }
+        if (data.code.length !== 6) {
+            setError("code", "Please Enter a valid code")
+            output = false
+        }
+        return output
+    }
     const handleShowResend = () => {
         setShowResend(true)
     }
-    const handleResendCode = () => post(route("login"),{
-        onSuccess:()=>{
+    const handleResendCode = () => post(route("login"), {
+        onSuccess: () => {
 
             setShowResend(false);
         }

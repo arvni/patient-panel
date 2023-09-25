@@ -17,6 +17,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::post('logout', [VerifyOTPRequestController::class, 'destroy'])
+    Route::any('logout', [VerifyOTPRequestController::class, 'destroy'])
                 ->name('logout');
 });

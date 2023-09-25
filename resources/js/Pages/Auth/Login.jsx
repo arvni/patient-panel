@@ -1,5 +1,5 @@
 import GuestLayout from '@/Layouts/GuestLayout';
-import {Head, useForm} from '@inertiajs/react';
+import {useForm} from '@inertiajs/react';
 import {Alert, Button, Grid, TextField} from "@mui/material";
 
 const Login = ({status}) => {
@@ -16,9 +16,10 @@ const Login = ({status}) => {
     return (<>
             {status && <Alert severity={"error"}>{status}</Alert>}
             <form onSubmit={submit}>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} justifyContent={"center"}>
                     <Grid item xs={12}>
                         <TextField name="mobile"
+                                   fullWidth
                                    label="Mobile"
                                    value={data.mobile}
                                    autoComplete="mobile"
