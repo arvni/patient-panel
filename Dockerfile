@@ -36,4 +36,4 @@ RUN npm i
 COPY . .
 RUN composer install
 RUN npm run build
-CMD php artisan serv
+CMD php artisan serv --host=0.0.0.0 --port=8000
