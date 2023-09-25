@@ -38,7 +38,7 @@ RUN npm i
 COPY . .
 RUN composer install
 RUN npm run build
-RUN supervisord -c /etc/supervisord.conf \
+CMD supervisord -c /etc/supervisord.conf \
     && supervisorctl reread \
     && supervisorctl update \
     && supervisorctl start "laravel-worker:*"
