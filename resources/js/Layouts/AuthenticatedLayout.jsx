@@ -17,7 +17,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import Paper from "@mui/material/Paper";
 import ListMenuItem from "./Components/MenuItem";
-import AppBar from './Components/Appbar';
+import AppBar from './Components/AppBar';
 import Drawer from './Components/Drawer';
 import Copyright from './Components/Copyright';
 import Header from './Components/Header';
