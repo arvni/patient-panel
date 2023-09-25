@@ -31,9 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
     'twilio' => [
-        'sid' => env("TWILIO_ACCOUNT_SID", ""),
-        'token' => env("TWILIO_AUTH_TOKEN", ""),
-        'serviceSid' => env("TWILIO_SERVICE_SID", "")
+        'sid' => env("TWILIO_ACCOUNT_SID"),
+        'token' => env("TWILIO_AUTH_TOKEN"),
+        'serviceSid' => env("TWILIO_SERVICE_SID")
     ]
 
 ];
