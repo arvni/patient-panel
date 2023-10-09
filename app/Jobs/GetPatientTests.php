@@ -96,7 +96,8 @@ class GetPatientTests implements ShouldQueue//, ShouldBeUnique
                 $acceptanceIds[] = $acceptanceData["id"];
             }
             $user->Acceptances()->whereNotIn("server_id", $acceptanceIds)->delete();
-        }
+        } elseif ($response->notFound() === 404)
+            $user->Acceptances()->delete();
 
     }
 
