@@ -10,15 +10,14 @@ import Copyright from './Components/Copyright';
 
 import AppMenu from "@/Layouts/Components/AppMenu";
 import Loading from "@/Components/Loading";
-import {Inertia} from "@inertiajs/inertia";
 import {Logout, Vaccines} from "@mui/icons-material";
-import {Head} from "@inertiajs/react";
+import {Head, router} from "@inertiajs/react";
 
 
 export default function Authenticated({auth, breadcrumbs, children, head}) {
     const [loading, setLoading] = useState(false);
     const handleVisit = (href) => () => {
-        Inertia.visit(route(href));
+        router.visit(route(href));
     };
     useEffect(() => {
         document.addEventListener('inertia:start', function () {
@@ -32,6 +31,11 @@ export default function Authenticated({auth, breadcrumbs, children, head}) {
         {
             title: "Test List",
             href: 'acceptances.index',
+            icon: <Vaccines/>,
+        },
+        {
+            title: "Reservation List",
+            href: 'reservations.index',
             icon: <Vaccines/>,
         },
         {

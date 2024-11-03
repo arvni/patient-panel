@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Acceptance;
 use App\Models\AcceptanceItem;
+use App\Models\Customer;
 use App\Models\User;
 use App\Services\ApiService;
 use Illuminate\Bus\Queueable;
@@ -33,9 +34,9 @@ class GetPatientTests implements ShouldQueue//, ShouldBeUnique
 
     /**
      * Create a new job instance.
-     * @param User $user
+     * @param Customer $user
      */
-    public function __construct(public User $user,)
+    public function __construct(public Customer $user,)
     {
         //
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\ConvertMobileNumberService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -67,7 +68,6 @@ class OTPRequest extends FormRequest
 
     public function getMobile()
     {
-        if (preg_match("/^((\+|00)?968)?([279]\d{7})$/", $this->mobile, $matches))
-            return $matches[3];
+        return ConvertMobileNumberService::convert($this->get("mobile"));
     }
 }

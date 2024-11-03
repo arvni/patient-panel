@@ -27,4 +27,13 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    protected function unauthenticated($request, array|\Illuminate\Auth\AuthenticationException $authenticationException)
+    {
+        if (in_array('web', $authenticationException->guards())) {
+            return redirect()->guest(route('admin.login'));
+        }
+
+        return parent::unauthenticated($request, $authenticationException);
+    }
 }

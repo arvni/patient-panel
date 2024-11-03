@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\OTPRequest;
 use App\Jobs\GetPatientTests;
 use App\Jobs\SendOTP;
+use App\Jobs\SendVerificationSMS;
+use App\Models\Customer;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -33,18 +35,18 @@ class OTPRequestController extends Controller
     public function store(OTPRequest $request)
     {
         $request->ensureIsNotRateLimited();
-        $user = User::where("mobile", $request->getMobile())->first();
+        $mobile=$request->getMobile();
+        $user = Customer::where("mobile", $mobile)->first();
         if (!$user) {
-            $user = User::create(["mobile" => $request->getMobile(), "last_otp_request" => Carbon::now()]);
+            $user = Customer::create(["mobile" => $mobile, "last_otp_request" => Carbon::now()]);
         } else {
             if (Carbon::parse($user->last_otp_request)->addMinutes(2)->lessThan(Carbon::now()))
                 $user->update(["last_otp_request" => Carbon::now()]);
             else
-                return redirect()->route("verify", ["mobile" => $request->getMobile(), "last_otp_request" => $user->last_opt_request]);
+                return redirect()->route("verify", ["mobile" => $mobile, "last_otp_request" => $user->last_opt_request]);
         }
-
-        SendOTP::dispatch($user);
+        SendVerificationSMS::dispatch($mobile);
         GetPatientTests::dispatch($user);
-        return redirect()->route("verify", ["mobile" => $request->getMobile(), "last_otp_request" => Carbon::now()]);
+        return redirect()->route("verify", ["mobile" => $mobile, "last_otp_request" => Carbon::now()]);
     }
 }

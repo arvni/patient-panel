@@ -1,0 +1,23 @@
+.reserved{
+    .rbc-event{
+        background: #8c0b0b
+    }
+}
+.disabled{
+    .rbc-event{
+        background:#505050;
+        color: #f0f0f0;
+    }
+}
+.online{
+    .rbc-event{
+        background: #500050;
+        color: #f0f0f0;
+    }
+}
+.online.reserved{
+    .rbc-event{
+        background: #8c0b0b;
+        color: #500050;
+    }
+}

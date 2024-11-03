@@ -14,6 +14,12 @@ class ApiService
         return Http::withToken(self::getApiToken())->timeout(180)->get($url);
     }
 
+
+    protected static function post($url,$data=[])
+    {
+        return Http::withToken(self::getApiToken())->timeout(180)->post($url,$data);
+    }
+
     public static function getApiToken()
     {
         if (Cache::has("sanctumToken"))
@@ -33,17 +39,10 @@ class ApiService
         return $token;
     }
 
-    public static function getReport($id)
+    public static function sendSms($data)
     {
-        $url = config("api.server_url") . config("api.report_path") . $id;
-        return self::get($url);
-    }
-
-
-    public static function getAcceptances(User $user)
-    {
-        $url = config("api.server_url") . config("api.acceptances_path") . $user->mobile;
-        return self::get($url);
+        $url = config("api.server_url") . config("api.send_sms");
+        return self::post($url,$data);
     }
 
 }

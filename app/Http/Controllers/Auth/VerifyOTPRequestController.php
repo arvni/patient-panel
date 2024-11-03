@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Customer;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Services\OtpService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +27,7 @@ class VerifyOTPRequestController extends Controller
      */
     public function create(Request $request)
     {
-        $user = User::where("mobile", $request->get("mobile"))->first();
+        $user = Customer::where("mobile", $request->get("mobile"))->first();
         if (!$user)
             return redirect()->route("login")->withErrors(["mobile" => __("auth.wrong_number")]);
         return Inertia::render('Auth/Verify', ['status' => session('status'), 'mobile' => $request->get("mobile"), "show_resend" => Gate::allows("requestForNewOTP", $user)]);
@@ -40,8 +42,8 @@ class VerifyOTPRequestController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-        $user = User::where("mobile", $request->get("mobile"))->first();
-        Auth::login($user);
+        $user = Customer::where("mobile", $request->get("mobile"))->first();
+        Auth::guard('customer')->login($user);
         $request->session()->regenerate();
         return redirect()->intended(RouteServiceProvider::HOME);
     }
@@ -54,6 +56,7 @@ class VerifyOTPRequestController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
+        Auth::guard('customer')->logout();
 
         $request->session()->invalidate();
 

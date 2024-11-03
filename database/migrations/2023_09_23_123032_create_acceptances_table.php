@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Customer;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +13,7 @@ return new class extends Migration {
     {
         Schema::create('acceptances', function (Blueprint $table) {
             $table->uuid("id")->primary();
-            $table->foreignIdFor(\App\Models\User::class)->references("id")->on("users");
+            $table->foreignIdFor(Customer::class)->constrained()->cascadeOnDelete();
             $table->unsignedInteger("server_id")->unique();
             $table->string("status");
             $table->timestamps();

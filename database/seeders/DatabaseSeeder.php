@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Doctor;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,11 +14,21 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        $doctors = [[
+            "image" => "/images/dr-saber.png",
+            "title" => "Dr.Siamak Saber",
+            "subtitle" => "(MD;PHD)",
+            "specialty" => "Genetic Consultant",
+        ], [
+            "image" => "/images/dr-abeer.png",
+            "title" => "Dr.Abeer Alsayegh",
+            "subtitle" => "(MD;PHD)",
+            "specialty" => "Genetic Consultant",
+        ]
+        ];
+        foreach ($doctors as $doctor){
+            Doctor::factory()->create($doctor);
+        }
+        User::factory()->create(["email"=>"admin@bion.com"]);
     }
 }

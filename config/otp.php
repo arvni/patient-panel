@@ -1,130 +1,73 @@
 <?php
 
+use Salehhashemi\OtpManager\Validators\DefaultMobileValidator;
+
 return [
 
     /*
     |--------------------------------------------------------------------------
-    | OTP Default Provider
+    | OTP Waiting Time
     |--------------------------------------------------------------------------
     |
-    | This option controls the default otp "userProvider" for your application.
-    | You may change this option, but it's a perfect start fot most applications.
+    | This option defines the number of seconds a user has to wait before
+    | being allowed to request a new OTP. Set it to a reasonable value
+    | to prevent abuse.
     |
     */
-    'default_provider' => 'users',
+    'waiting_time' => 120,
 
     /*
-     |--------------------------------------------------------------------------
-     | User Providers
-     |--------------------------------------------------------------------------
-     |
-     | Here you should specify your user providers. This defines how the users are actually retrieved out of your
-     | database or other storage mechanisms used by this application to persist your user's data.
-     |
-     | Keep in mind, every model must implement "Fouladgar\OTP\Contracts\OTPNotifiable" and also
-     | use this "Fouladgar\OTP\Concerns\HasOTPNotify" trait.
-     |
-     | You may also change the default repository and replace your own repository. But every repository must
-     | implement "Fouladgar\OTP\Contracts\NotifiableRepositoryInterface" interface.
-     |
-     */
-    'user_providers'   => [
-        'users' => [
-            'table'      => 'users',
-            'model'      => \App\Models\User::class,
-            'repository' => \Fouladgar\OTP\NotifiableRepository::class,
-        ],
+    |--------------------------------------------------------------------------
+    | OTP Code Range
+    |--------------------------------------------------------------------------
+    |
+    | These options define the minimum and maximum range for the generated
+    | OTP codes. Adjust these values as per your security requirements.
+    |
+    */
+    'code_min' => 111111,
+    'code_max' => 999999,
 
-//        'admins' => [
-//            'model'      => \App\Models\Admin::class,
-//            'repository' => \Fouladgar\OTP\NotifiableRepository::class,
-//        ],
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile Validation Class
+    |--------------------------------------------------------------------------
+    |
+    | This option defines the class responsible for validating mobile numbers.
+    | If you want to use your own validation logic, you can create your
+    | own class and replace the class name here.
+    |
+    */
+    'mobile_validation_class' => DefaultMobileValidator::class,
+    'default_provider'=>"customers",
+    'user_providers'=>[
+        'customers'=>[
+            'table'=>'customers'
+        ]
     ],
 
     /*
-     |--------------------------------------------------------------------------
-     | Default Mobile Column
-     |--------------------------------------------------------------------------
-     |
-     | Here you should specify name of your column (in users table) which user
-     | mobile number reside in.
-     |
-     */
-    'mobile_column'    => 'mobile',
-
-    /*
-     |--------------------------------------------------------------------------
-     | Default OTP Tokens Table Name
-     |--------------------------------------------------------------------------
-     |
-     | Here you should specify name of your OTP tokens table in database.
-     | This table will held all information about created OTP tokens for users.
-     |
-     */
-    'token_table'      => 'otp_tokens',
-
-    /*
-     |--------------------------------------------------------------------------
-     | Verification Token Length
-     |--------------------------------------------------------------------------
-     |
-     | Here you can specify length of OTP tokens which will send to users.
-     |
-     */
-    'token_length'     => env('OTP_TOKEN_LENGTH', 5),
-
-    /*
-     |--------------------------------------------------------------------------
-     | Verification Token Lifetime
-     |--------------------------------------------------------------------------
-     |
-     | Here you can specify lifetime of OTP tokens (in minutes) which will send to users.
-     |
-     */
-    'token_lifetime'   => env('OTP_TOKEN_LIFE_TIME', 5),
-
-    /*
-   |--------------------------------------------------------------------------
-   | OTP Prefix
-   |--------------------------------------------------------------------------
-   |
-   | Here you can specify prefix of OTP tokens for adding to cache.
-   |
-   */
-    'prefix'           => 'otp_',
-
-    /*
-     |--------------------------------------------------------------------------
-     | SMS Client (REQUIRED)
-     |--------------------------------------------------------------------------
-     |
-     | Here you should specify your implemented "SMS Client" class. This class is responsible
-     | for sending SMS to users. You may use your own sms channel, so this is not a required option anymore.
-     |
-     */
-    'sms_client'       => '',
-
-    /*
     |--------------------------------------------------------------------------
-    |  Token Storage Driver
+    | Rate Limiting Configurations
     |--------------------------------------------------------------------------
     |
-    | Here you may define token "storage" driver. If you choose the "cache", the token will be stored
-    | in a cache driver configured by your application. Otherwise, a table will be created for storing tokens.
-    |
-    | Supported drivers: "cache", "database"
+    | These options define the rate limiting configurations for the OTP
+    | manager. Adjust these values as per your security requirements.
     |
     */
-    'token_storage'    => env('OTP_TOKEN_STORAGE', 'cache'),
+    'rate_limiting' => [
+        'max_attempts' => 5,
+        'decay_minutes' => 1,
+    ],
 
     /*
     |--------------------------------------------------------------------------
-    |  Default SMS Notification Channel
+    | Verification Attempt and Lockout Configurations
     |--------------------------------------------------------------------------
     |
-    | This is an otp default sms channel. But you may specify your own sms channel.
-    | If you use default channel you must set "sms_client". Otherwise you don't need that.
+    | These options control how many failed verification attempts are allowed
+    | before otp invalidation.
     |
     */
-    'channel'          => \Fouladgar\OTP\Notifications\Channels\OTPSMSChannel::class,
+    'max_verify_attempts' => 5,
 ];

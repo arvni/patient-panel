@@ -2,14 +2,13 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Services\OtpService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Twilio\Exceptions\TwilioException;
-use Twilio\Rest\Client;
 
 class LoginRequest extends FormRequest
 {
@@ -29,7 +28,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mobile' => ["required", "exists:users,mobile"],
+            'mobile' => ["required", "exists:customers,mobile"],
             'code' => ["required", "size:6"]
         ];
     }
@@ -93,22 +92,6 @@ class LoginRequest extends FormRequest
 
     private function checkOTP()
     {
-        try {
-            $sid = config("services.twilio.sid");
-            $token = config("services.twilio.token");
-            $serviceSid = config("services.twilio.serviceSid");
-            $twilio = new Client($sid, $token);
-            $result = $twilio->verify->v2->services($serviceSid)
-                ->verificationChecks
-                ->create([
-                        "to" => "+968" . $this->getMobile(),
-                        "code" => $this->code
-                    ]
-                );
-            return $result->valid;
-        } catch (TwilioException $exception) {
-            return false;
-        }
-
+        return OtpService::checkOtp($this->mobile, $this->code);
     }
 }

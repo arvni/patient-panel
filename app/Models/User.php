@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,9 +20,18 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'mobile',
-        'last_login',
-        'last_otp_request',
+        'userName',
+        'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     /**
@@ -30,13 +40,13 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'last_login' => 'datetime',
-        'last_opt_request' => 'datetime',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
 
-    public function Acceptances()
+    public function Doctor()
     {
-        return $this->hasMany(Acceptance::class);
+        return $this->hasOne(Doctor::class);
     }
 
 }

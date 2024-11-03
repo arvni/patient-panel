@@ -2,15 +2,18 @@
 
 namespace Database\Factories;
 
-use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
+    protected static ?string $password;
+
     /**
      * Define the model's default state.
      *
@@ -20,8 +23,10 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'mobile' => "+96878454640",
-            'last_otp_request' => Carbon::now()
+            'email' => fake()->unique()->safeEmail(),
+            "userName"=>fake()->unique()->userName(),
+            'password' => static::$password ??= Hash::make('password'),
+            'remember_token' => Str::random(10),
         ];
     }
 
@@ -30,7 +35,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

@@ -1,13 +1,10 @@
 <?php
 
 use App\Http\Controllers\AcceptanceController;
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Reservation\PaymentCallbackController;
+use App\Http\Controllers\Reservation\PaymentController;
+use App\Http\Controllers\Reservation\ReservationController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Twilio\Rest\Client;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,18 +18,27 @@ use Twilio\Rest\Client;
 */
 
 Route::get('/', function () {
-    if (auth()->user())
+    if (auth("customer")->user())
         return redirect()->route("acceptances.index");
     return redirect()->route("login");
 });
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:customer')->group(function () {
     Route::get("/dashboard", [AcceptanceController::class, "index"])->name("acceptances.index");
     Route::get("/tests/{acceptance}", [AcceptanceController::class, "show"])->name("acceptances.show");
     Route::get("/tests/{acceptanceItem}/report", [AcceptanceController::class, "report"])->name("acceptances.report");
+    Route::resource("reservations", ReservationController::class);
 
+
+    Route::post("reservations/{reservation}/payment", PaymentController::class)
+        ->middleware("throttle:10,6")
+        ->name("reservations.payment");
+
+    Route::any("reservations/{reservation}/payment", PaymentCallbackController::class)
+        ->name("reservations.payment.callback");
 });
 
 
 require __DIR__ . '/auth.php';
+require __DIR__ . '/admin.php';
