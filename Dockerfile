@@ -6,16 +6,16 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# packages
-RUN docker-php-ext-install mysqli pdo_mysql
+RUN apk add --no-cache --update libmemcached-libs zlib libzip-dev libpng-dev libsodium libsodium-dev  jpeg-dev freetype-dev
 # memcached
 ENV MEMCACHED_DEPS zlib-dev libmemcached-dev cyrus-sasl-dev
 
-RUN apk add --no-cache --update libmemcached-libs zlib libzip-dev libpng-dev supervisor
+# packages
+RUN docker-php-ext-install mysqli pdo_mysql sodium zip
 
 RUN docker-php-ext-configure zip
-RUN docker-php-ext-configure gd
+RUN docker-php-ext-configure gd --with-jpeg --with-freetype --enable-gd
+RUN docker-php-ext-configure sodium
 RUN docker-php-ext-install -j$(nproc) gd
 
 
@@ -28,18 +28,15 @@ RUN set -xe \
     && rm -rf /tmp/* \
     && apk del .memcached-deps .phpize-deps
 
-WORKDIR /app
 ENV COMPOSER_ALLOW_SUPERUSER 1
-COPY laravel-worker.ini /etc/supervisor.d/
 
 EXPOSE 8000
-COPY package.json ./
+WORKDIR /app
+COPY ./package.json ./package.json
 RUN npm i
 COPY . .
 RUN composer install
-RUN npm run build
-CMD supervisord -c /etc/supervisord.conf \
-    && supervisorctl reread \
-    && supervisorctl update \
-    && supervisorctl start "laravel-worker:*"
-CMD php artisan serv --host=0.0.0.0 --port=8000
+RUN npm run build -f
+COPY start.sh /usr/local/bin/start
+RUN chmod u+x /usr/local/bin/start
+CMD ["/usr/local/bin/start"]

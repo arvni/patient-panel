@@ -6,7 +6,6 @@ import Drawer from "@/Layouts/Components/Drawer";
 import logo from "@/../images/logo.png";
 
 const DesktopDrawer = ({toggleDrawer, list, onClick, permissions, open}) => {
-
     return <Drawer variant="permanent" open={open}>
         <Toolbar sx={{
             display: 'flex',
@@ -21,8 +20,7 @@ const DesktopDrawer = ({toggleDrawer, list, onClick, permissions, open}) => {
         </Toolbar>
         <Divider/>
         <List component="nav">
-            {list.map((item, index) => (!item.hasOwnProperty("permission") || permissions.includes(item.permission)) ?
-                <ListMenuItem key={index} onClick={onClick} {...item}/> : null)}
+            {list.map((item, index) =><ListMenuItem key={index} onClick={onClick} {...item}/>)}
         </List>
     </Drawer>
 }

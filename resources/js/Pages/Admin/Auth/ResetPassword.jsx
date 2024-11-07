@@ -4,9 +4,9 @@ import {Box, FormHelperText, Grid, TextField} from "@mui/material";
 import GuestLayout from "@/Layouts/GuestLayout";
 import {useSubmitForm} from "@/services/api";
 import {resetPasswordValidator} from "@/services/validate";
-import PasswordField from "@/Components/PasswordField";
+import PasswordField from "../Components/PasswordField";
 import ReCAPTCHA from "react-google-recaptcha";
-import LoadingButton from "@/Components/LoadingButton.jsx";
+import LoadingButton from "../Components/LoadingButton.jsx";
 
 export default function ResetPassword({token, email}) {
     const {

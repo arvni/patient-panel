@@ -4,7 +4,7 @@ import {Box, FormHelperText, Grid, TextField} from "@mui/material";
 import {useSubmitForm} from "@/services/api";
 import {forgetPasswordValidator} from "@/services/validate";
 import ReCAPTCHA from "react-google-recaptcha";
-import LoadingButton from "@/Components/LoadingButton.jsx";
+import LoadingButton from "./LoadingButton.jsx";
 
 const ForgetPasswordForm = () => {
 

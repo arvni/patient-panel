@@ -15,7 +15,10 @@ import {router} from "@inertiajs/react";
 
 const Index = ({acceptances, request}) => {
     const startRow = (request.page - 1) * request.pageSize;
-    const show = (id) => () => router.visit(route("acceptances.show", id));
+    const show = (id) => e => {
+        e.preventDefault();
+        router.visit(route("acceptances.show", id));
+    }
     const handlePageChange = (e, page) => reloadPage(page + 1, request.pageSize, request.filters);
     const handlePageSizeChange = (e) => reloadPage(1, e.target.value, request.filters);
     const reloadPage = (page, pageSize, filters) => router.visit(route("acceptances.index"), {

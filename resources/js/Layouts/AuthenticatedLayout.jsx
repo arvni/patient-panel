@@ -10,15 +10,14 @@ import Copyright from './Components/Copyright';
 
 import AppMenu from "@/Layouts/Components/AppMenu";
 import Loading from "@/Components/Loading";
-import {Logout, Vaccines} from "@mui/icons-material";
+import {AddIcCall, Logout, Vaccines} from "@mui/icons-material";
 import {Head, router} from "@inertiajs/react";
+import {CalendarIcon} from "@mui/x-date-pickers";
 
 
 export default function Authenticated({auth, breadcrumbs, children, head}) {
     const [loading, setLoading] = useState(false);
-    const handleVisit = (href) => () => {
-        router.visit(route(href));
-    };
+    const handleVisit = (href) => router.visit(route(href));
     useEffect(() => {
         document.addEventListener('inertia:start', function () {
             setLoading(true);
@@ -36,7 +35,12 @@ export default function Authenticated({auth, breadcrumbs, children, head}) {
         {
             title: "Reservation List",
             href: 'reservations.index',
-            icon: <Vaccines/>,
+            icon: <CalendarIcon/>,
+        },
+        {
+            title: "Book an appointment",
+            href: 'reservations.create',
+            icon: <AddIcCall/>,
         },
         {
             title: "Logout",

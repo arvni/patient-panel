@@ -15,7 +15,10 @@ import {router} from "@inertiajs/react";
 
 const Index = ({reservations, request}) => {
     const startRow = (request?.page??1 - 1) * (request?.pageSize??10);
-    const show = (id) => () => router.visit(route("reservations.show", id));
+    const show = (id) => e => {
+        e.preventDefault();
+        router.visit(route("reservations.show", id));
+    }
     const handlePageChange = (e, page) => reloadPage(page + 1, request.pageSize, request.filters);
     const handlePageSizeChange = (e) => reloadPage(1, e.target.value, request.filters);
     const reloadPage = (page, pageSize, filters) => router.visit(route("reservations.index"), {
@@ -39,9 +42,9 @@ const Index = ({reservations, request}) => {
                     <TableCell
                         key={"row-" + reservation.id}>{startRow + index + 1}</TableCell>
                     <TableCell
-                        key={"created_at-" + reservation.ie}>{new Date(reservation.created_at).toDateString()}</TableCell>
+                        key={"created_at-" + reservation.ie}>{reservation?.time?.started_at}</TableCell>
                     <TableCell
-                        key={"updated_at-" + reservation.ie}>{new Date(reservation.updated_at).toDateString()}</TableCell>
+                        key={"updated_at-" + reservation.ie}>{reservation?.time?.doctor?.title}</TableCell>
                     <TableCell key={"status-" + reservation.id}>{reservation.status}</TableCell>
                     <TableCell key={"action-" + reservation.id}>
                         <IconButton color={"primary"} href={route("reservations.show", reservation.id)}

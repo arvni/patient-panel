@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import "./client.css";
-import EnxRtc from "../../services/EnxRtc.js";
+import EnxRtc from "../../../services/EnxRtc.js";
 import {IconButton} from "@mui/material";
 import {Mic, PhoneDisabled, Videocam} from "@mui/icons-material";
 

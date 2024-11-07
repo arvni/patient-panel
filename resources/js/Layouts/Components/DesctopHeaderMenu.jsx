@@ -4,7 +4,7 @@ import Header from "@/Layouts/Components/Header";
 import AppBar from "@/Layouts/Components/AppBar";
 import React from "react";
 
-const DesktopHeaderMenu=({open,onDrawerClick,breadcrumbs,logout,userName})=>{
+const DesktopHeaderMenu = ({open, onDrawerClick, breadcrumbs, logout, userName}) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -12,6 +12,9 @@ const DesktopHeaderMenu=({open,onDrawerClick,breadcrumbs,logout,userName})=>{
     const handleClose = () => {
         setAnchorEl(null);
     };
+    const handleLogout = e => {
+        logout('logout', "post")
+    }
     return <AppBar position={"absolute"} open={open}>
         <Toolbar sx={{pr: '24px'}}>
             <IconButton
@@ -63,7 +66,7 @@ const DesktopHeaderMenu=({open,onDrawerClick,breadcrumbs,logout,userName})=>{
                 onClose={handleClose}
             >
                 <MenuItem onClick={handleClose}>{userName}</MenuItem>
-                <MenuItem onClick={logout('logout', "post")}> خروج</MenuItem>
+                <MenuItem onClick={handleLogout}> Logout</MenuItem>
             </Menu>
         </Toolbar>
     </AppBar>
