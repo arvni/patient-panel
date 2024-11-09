@@ -3,13 +3,15 @@
 namespace App\Services;
 
 use App\Models\Customer;
+use GuzzleHttp\Promise\PromiseInterface;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class ApiService
 {
 
-    protected static function get($url)
+    protected static function get($url): PromiseInterface|Response
     {
         return Http::withToken(self::getApiToken())->timeout(180)->get(config("api.server_url") .$url);
     }
@@ -39,7 +41,7 @@ class ApiService
         return $token;
     }
 
-    public static function getReport($id)
+    public static function getReport($id): PromiseInterface|Response
     {
         return self::get(config("api.report_path") . $id);
     }
