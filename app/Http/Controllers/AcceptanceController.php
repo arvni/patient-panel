@@ -45,7 +45,7 @@ class AcceptanceController extends Controller
 
     public function report(AcceptanceItem $acceptanceItem)
     {
-        if ($acceptanceItem->Acceptance->user_id !== auth()->user()->id)
+        if ($acceptanceItem->Acceptance->customer_id !== auth()->user()->id)
             abort(403);
         $fileName = "Users/" . auth()->user()->id . "/AcceptanceItems/" . $acceptanceItem->id . ".pdf";
         $report = ApiService::getReport($acceptanceItem->report);
