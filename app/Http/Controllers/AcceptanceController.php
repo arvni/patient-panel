@@ -48,7 +48,7 @@ class AcceptanceController extends Controller
         if ($acceptance->customer_id !== auth()->user()->id)
             abort(403);
         $fileName = "Users/" . auth()->user()->id . "/AcceptanceItems/" . $acceptance->id;
-        $report = ApiService::getReport($acceptance->id);
+        $report = ApiService::getReport($acceptance->server_id);
         if ($report->failed())
             abort("400", "File not found");
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);

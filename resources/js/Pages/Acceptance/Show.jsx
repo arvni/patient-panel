@@ -82,7 +82,7 @@ const Show = ({acceptance}) => {
         <TableBody>
             {acceptance.acceptance_items.map(item => <Row key={item.id} acceptanceItem={item} />)}
         </TableBody>
-        {acceptance.status !== "reported"?<TableFooter>
+        {acceptance.status === "reported"?<TableFooter>
             <TableRow>
                 <TableCell>
                     <Button onClick={handleDownload} disabled={acceptance.status !== "reported"}>Download</Button>
