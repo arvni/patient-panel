@@ -25,7 +25,7 @@ class ApiService
         if (Cache::has("sanctumToken"))
             $token = decrypt(Cache::get("sanctumToken"));
         else {
-            $response = Http::post( config("api.login_path"), [
+            $response = Http::post( config("api.server_url") .config("api.login_path"), [
                 "email" => config("api.email"),
                 "password" => config("api.password")
             ]);
