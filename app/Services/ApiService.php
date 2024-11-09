@@ -44,7 +44,7 @@ class ApiService
 
     public static function getReport($id): PromiseInterface|Response
     {
-        $url=Str::replace("{acceptance}",$id,config("api.report_path") . $id);
+        $url=Str::replace("{acceptance}",$id,config("api.report_path"));
         return self::get($url);
     }
     public static function getAcceptances(Customer $user)

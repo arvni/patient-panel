@@ -3,7 +3,7 @@ return [
     "server_url" => env("SERVER_URL", ""),
     "acceptances_path" => env("ACCEPTANCES_PATH", "acceptances/"),
     "login_path" => env("LOGIN_PATH", "login/"),
-    "report_path" => env("REPORT_PATH", "/orders/{acceptance}/report"),
+    "report_path" => env("REPORT_PATH", "orders/{acceptance}/report"),
     "email" => env("API_LOGIN_EMAIL",""),
     "password" => ENV("API_LOGIN_PASSWORD",""),
     "send_sms" => env("SEND_SMS_PATH", "send-sms/"),
