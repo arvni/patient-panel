@@ -7,7 +7,7 @@ import {
     Stepper,
     Table,
     TableBody,
-    TableCell,
+    TableCell, TableFooter,
     TableHead,
     TableRow,
 } from "@mui/material";
@@ -43,12 +43,9 @@ const Row = ({acceptanceItem, handleDownload}) => {
             <TableCell>
                 {acceptanceItem.status}
             </TableCell>
-            <TableCell>
-                <Button onClick={handleDownload} disabled={acceptanceItem.status !== "reported"}>Download</Button>
-            </TableCell>
         </TableRow>
         <TableRow key={"row-2-" + acceptanceItem.id}>
-            <TableCell style={{paddingBottom: 0, paddingTop: 0}} colSpan={3}>
+            <TableCell style={{paddingBottom: 0, paddingTop: 0}} >
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <Stepper nonLinear alternativeLabel sx={{marginTop: 1}}
                              activeStep={activeKey - 1}>
@@ -68,8 +65,8 @@ const Row = ({acceptanceItem, handleDownload}) => {
 }
 
 const Show = ({acceptance}) => {
-    const handleDownload = (id) => () => {
-        window.open(route("acceptances.report", id), "_blank");
+    const handleDownload = () => {
+        window.open(route("acceptances.report", acceptance.id), "_blank");
     }
     return <Table>
         <TableHead>
@@ -80,15 +77,18 @@ const Show = ({acceptance}) => {
                 <TableCell>
                     Status
                 </TableCell>
-                <TableCell>
-                    Report
-                </TableCell>
             </TableRow>
         </TableHead>
         <TableBody>
-            {acceptance.acceptance_items.map(item => <Row key={item.id} acceptanceItem={item}
-                                                          handleDownload={handleDownload(item.id)}/>)}
+            {acceptance.acceptance_items.map(item => <Row key={item.id} acceptanceItem={item} />)}
         </TableBody>
+        {acceptance.status !== "reported"?<TableFooter>
+            <TableRow>
+                <TableCell>
+                    <Button onClick={handleDownload} disabled={acceptance.status !== "reported"}>Download</Button>
+                </TableCell>
+            </TableRow>
+        </TableFooter>:null}
     </Table>;
 }
 Show.layout = page => <Authenticated head={"Test " + new Date(page.props.acceptance.created_at).toDateString()}

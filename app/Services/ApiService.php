@@ -7,6 +7,7 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class ApiService
 {
@@ -43,7 +44,8 @@ class ApiService
 
     public static function getReport($id): PromiseInterface|Response
     {
-        return self::get(config("api.report_path") . $id);
+        $url=Str::replace("{acceptance}",$id,config("api.report_path") . $id);
+        return self::get($url);
     }
     public static function getAcceptances(Customer $user)
     {
