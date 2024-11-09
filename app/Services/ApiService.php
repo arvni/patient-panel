@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -11,13 +11,13 @@ class ApiService
 
     protected static function get($url)
     {
-        return Http::withToken(self::getApiToken())->timeout(180)->get($url);
+        return Http::withToken(self::getApiToken())->timeout(180)->get(config("api.server_url") .$url);
     }
 
 
     protected static function post($url,$data=[])
     {
-        return Http::withToken(self::getApiToken())->timeout(180)->post($url,$data);
+        return Http::withToken(self::getApiToken())->timeout(180)->post(config("api.server_url") .$url,$data);
     }
 
     public static function getApiToken()
@@ -25,7 +25,7 @@ class ApiService
         if (Cache::has("sanctumToken"))
             $token = decrypt(Cache::get("sanctumToken"));
         else {
-            $response = Http::post(config("api.server_url") . config("api.login_path"), [
+            $response = Http::post( config("api.login_path"), [
                 "email" => config("api.email"),
                 "password" => config("api.password")
             ]);
@@ -41,19 +41,16 @@ class ApiService
 
     public static function getReport($id)
     {
-        $url = config("api.server_url") . config("api.report_path") . $id;
-        return self::get($url);
+        return self::get(config("api.report_path") . $id);
     }
-    public static function getAcceptances(User $user)
+    public static function getAcceptances(Customer $user)
     {
-        $url = config("api.server_url") . config("api.acceptances_path") . $user->mobile;
-        return self::get($url);
+        return self::get(config("api.acceptances_path") . $user->mobile);
     }
 
     public static function sendSms($data)
     {
-        $url = config("api.server_url") . config("api.send_sms");
-        return self::post($url,$data);
+        return self::post(config("api.send_sms"),$data);
     }
 
 }
