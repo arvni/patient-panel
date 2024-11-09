@@ -49,12 +49,12 @@ class AcceptanceController extends Controller
             abort(403);
         $fileName = "Users/" . auth()->user()->id . "/AcceptanceItems/" . $acceptance->id;
         $report = ApiService::getReport($acceptance->server_id);
-        if ($report->failed())
+        if (!$report->ok())
             abort("400", "File not found");
-        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
         if (Storage::exists($fileName))
             Storage::delete($fileName);
         Storage::disk('local')->put($fileName, $report);
+        $extension = pathinfo(storage_path("app/" . $fileName), PATHINFO_EXTENSION);
         return Response::download(storage_path("app/" . $fileName), Str::uuid() . $extension);
     }
 
