@@ -39,6 +39,17 @@ class ApiService
         return $token;
     }
 
+    public static function getReport($id)
+    {
+        $url = config("api.server_url") . config("api.report_path") . $id;
+        return self::get($url);
+    }
+    public static function getAcceptances(User $user)
+    {
+        $url = config("api.server_url") . config("api.acceptances_path") . $user->mobile;
+        return self::get($url);
+    }
+
     public static function sendSms($data)
     {
         $url = config("api.server_url") . config("api.send_sms");
