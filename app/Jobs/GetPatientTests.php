@@ -71,7 +71,7 @@ class GetPatientTests implements ShouldQueue//, ShouldBeUnique
                     "created_at" => $acceptanceData["created_at"],
                     "updated_at" => $acceptanceData["updated_at"]
                 ]);
-                $acceptance->User()->associate($user->id);
+                $acceptance->Customer()->associate($user->id);
                 if ($acceptance->isDirty())
                     $acceptance->save();
                 $ids = [];

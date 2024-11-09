@@ -26,7 +26,7 @@ class AcceptanceController extends Controller
 
     public function index(Request $request)
     {
-        $query = auth()->user()->Acceptances();
+        $query = auth("customers")->user()->Acceptances();
         if ($request->has("filters.date"))
             $query->whereBetween("created_at", $request->get("filters.date"));
         if ($request->has("filters.search"))

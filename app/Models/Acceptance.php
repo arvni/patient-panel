@@ -22,8 +22,8 @@ class Acceptance extends Model
         return $this->hasMany(AcceptanceItem::class);
     }
 
-    public function User()
+    public function Customer()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Customer::class);
     }
 }
