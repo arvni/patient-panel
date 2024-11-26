@@ -27,7 +27,7 @@ Route::get('/', function () {
 Route::middleware('auth:customer')->group(function () {
     Route::get("/dashboard", [AcceptanceController::class, "index"])->name("acceptances.index");
     Route::get("/tests/{acceptance}", [AcceptanceController::class, "show"])->name("acceptances.show");
-    Route::get("/tests/{acceptance}/report", [AcceptanceController::class, "report"])->name("acceptances.report");
+    Route::get("/tests/{acceptanceItem}/report", [AcceptanceController::class, "report"])->name("acceptances.report");
     Route::resource("reservations", ReservationController::class);
 
 

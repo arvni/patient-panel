@@ -5,15 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Customer;
-use App\Models\User;
 use App\Providers\RouteServiceProvider;
-use App\Services\OtpService;
-use Carbon\Carbon;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -55,8 +51,16 @@ class VerifyOTPRequestController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
-        Auth::guard('customer')->logout();
+        if (Auth::guard('web')->check()) {
+            Auth::guard('web')->logout();
+            \Log::info('Logged out from web guard');
+        }
+
+        if (Auth::guard('customer')->check()) {
+            Auth::guard('customer')->logout();
+            \Log::info('Logged out from customer guard');
+        }
+
 
         $request->session()->invalidate();
 

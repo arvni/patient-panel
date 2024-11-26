@@ -43,12 +43,14 @@ class AcceptanceController extends Controller
         return Inertia::render("Acceptance/Show", compact("acceptance"));
     }
 
-    public function report(Acceptance $acceptance)
+    public function report(AcceptanceItem $acceptanceItem)
     {
-        if ($acceptance->customer_id !== auth()->user()->id)
+        $acceptanceItem->load("Acceptance");
+        if ($acceptanceItem->Acceptance->customer_id !== auth()->user()->id)
             abort(403);
-        $fileName = "Users/" . auth()->user()->id . "/AcceptanceItems/" . $acceptance->id;
-        $report = ApiService::getReport($acceptance->server_id);
+        $acceptance = $acceptanceItem->Acceptance->id;
+        $fileName = "Users/" . auth()->user()->id . "/$acceptance/AcceptanceItems/" . $acceptanceItem->id;
+        $report = ApiService::getReport($acceptanceItem->server_id);
         if (!$report->ok())
             abort("400", "File not found");
         if (Storage::exists($fileName))
