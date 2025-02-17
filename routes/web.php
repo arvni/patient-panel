@@ -4,6 +4,7 @@ use App\Http\Controllers\AcceptanceController;
 use App\Http\Controllers\Reservation\PaymentCallbackController;
 use App\Http\Controllers\Reservation\PaymentController;
 use App\Http\Controllers\Reservation\ReservationController;
+use App\Http\Controllers\ShowAcceptanceItemReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,10 +28,9 @@ Route::get('/', function () {
 Route::middleware('auth:customer')->group(function () {
     Route::get("/dashboard", [AcceptanceController::class, "index"])->name("acceptances.index");
     Route::get("/tests/{acceptance}", [AcceptanceController::class, "show"])->name("acceptances.show");
-    Route::get("/tests/{acceptanceItem}/report", [AcceptanceController::class, "report"])->name("acceptances.report");
+    Route::get("tests/{acceptance}/acceptance-items/{acceptanceItem}/report", [AcceptanceController::class, "report"])->name("acceptanceItems.report");
+    Route::get("tests/{acceptance}/acceptance-items/{acceptanceItem}", ShowAcceptanceItemReportController::class)->name("acceptanceItems.show");
     Route::resource("reservations", ReservationController::class);
-
-
     Route::post("reservations/{reservation}/payment", PaymentController::class)
         ->middleware("throttle:10,6")
         ->name("reservations.payment");

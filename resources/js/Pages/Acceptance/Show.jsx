@@ -12,6 +12,7 @@ import {
     TableRow,
 } from "@mui/material";
 import {useState} from "react";
+import {router} from "@inertiajs/react";
 
 const Row = ({acceptanceItem}) => {
     const [open, setOpen] = useState(true);
@@ -34,7 +35,10 @@ const Row = ({acceptanceItem}) => {
         }
     ];
     const activeKey = [1, 2, 3, 4].filter(value => !Object.keys(acceptanceItem.timeline).includes(value + ""))[0];
-    const handleDownload = () => window.open(route("acceptances.report", acceptanceItem.id), "_blank");
+    const handleDownload = () => router.visit(route("acceptanceItems.show", {
+        acceptanceItem:acceptanceItem.id,
+        acceptance:acceptanceItem.acceptance_id
+    }));
     const handleCollapse = () => setOpen(prevState => !prevState);
     return <>
         <TableRow key={"row-1-" + acceptanceItem.id}>
@@ -49,7 +53,7 @@ const Row = ({acceptanceItem}) => {
             </TableCell>
         </TableRow>
         <TableRow key={"row-2-" + acceptanceItem.id}>
-            <TableCell style={{paddingBottom: 0, paddingTop: 0}} >
+            <TableCell style={{paddingBottom: 0, paddingTop: 0}}>
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <Stepper nonLinear alternativeLabel sx={{marginTop: 1}}
                              activeStep={activeKey - 1}>
@@ -84,7 +88,7 @@ const Show = ({acceptance}) => {
             </TableRow>
         </TableHead>
         <TableBody>
-            {acceptance.acceptance_items.map(item => <Row key={item.id} acceptanceItem={item} />)}
+            {acceptance.acceptance_items.map(item => <Row key={item.id} acceptanceItem={item}/>)}
         </TableBody>
     </Table>;
 }

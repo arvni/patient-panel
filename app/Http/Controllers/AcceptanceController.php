@@ -43,7 +43,7 @@ class AcceptanceController extends Controller
         return Inertia::render("Acceptance/Show", compact("acceptance"));
     }
 
-    public function report(AcceptanceItem $acceptanceItem)
+    public function report(Acceptance $acceptance,AcceptanceItem $acceptanceItem)
     {
         $acceptanceItem->load("Acceptance");
         if ($acceptanceItem->Acceptance->customer_id !== auth()->user()->id)
