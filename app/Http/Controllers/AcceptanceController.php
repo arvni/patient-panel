@@ -56,8 +56,19 @@ class AcceptanceController extends Controller
         if (Storage::exists($fileName))
             Storage::delete($fileName);
         Storage::disk('local')->put($fileName, $report);
-        $extension = pathinfo(storage_path("app/" . $fileName), PATHINFO_EXTENSION);
-        return Response::download(storage_path("app/" . $fileName), Str::uuid() . $extension);
+
+        $contentDisposition = $report->header('Content-Disposition');
+
+        // Initialize the file name
+        $fN = Str::uuid(); // Default filename if not found
+
+        if ($contentDisposition) {
+            // Parse the filename from the Content-Disposition header
+            if (preg_match('/filename="([^"]+)"/', $contentDisposition, $matches)) {
+                $fN = $matches[1]; // Extracted filename
+            }
+        }
+        return Response::download(storage_path("app/" . $fileName),$fN);
     }
 
 

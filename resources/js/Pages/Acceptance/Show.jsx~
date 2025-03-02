@@ -49,7 +49,7 @@ const Row = ({acceptanceItem}) => {
                 {acceptanceItem.status}
             </TableCell>
             <TableCell>
-                <Button onClick={handleDownload} disabled={acceptanceItem.status !== "reported"}>View Report</Button>
+                <Button onClick={handleDownload} disabled={acceptanceItem.status !== "reported"}>Download</Button>
             </TableCell>
         </TableRow>
         <TableRow key={"row-2-" + acceptanceItem.id}>

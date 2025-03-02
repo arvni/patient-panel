@@ -48,7 +48,7 @@ const Index = ({acceptances, request}) => {
                         key={"updated_at-" + acceptance.ie}>{new Date(acceptance.updated_at).toDateString()}</TableCell>
                     <TableCell key={"status-" + acceptance.id}>{acceptance.status}</TableCell>
                     <TableCell key={"action-" + acceptance.id}>
-                        <IconButton color={"primary"} href={route("acceptances.show", acceptance.id)}
+                        <IconButton color="primary" href={route("acceptances.show", acceptance.id)}
                                     onClick={show(acceptance.id)}>
                             <RemoveRedEye/>
                         </IconButton>

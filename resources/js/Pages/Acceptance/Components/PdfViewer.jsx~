@@ -34,8 +34,8 @@ const PdfJsViewer = ({ fileUrl }) => {
                     canvas.height = viewport.height;
 
                     // Scale visually for better quality
-                    canvas.style.width = `${viewport.width / 3}px`;
-                    canvas.style.height = `${viewport.height / 3}px`;
+                    canvas.style.width = `${viewport.width / 2}px`;
+                    canvas.style.height = `${viewport.height / 2}px`;
 
                     const renderContext = {
                         canvasContext: context,
