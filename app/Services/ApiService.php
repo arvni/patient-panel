@@ -48,9 +48,11 @@ class ApiService
         return self::get($url);
     }
 
-    public static function getAcceptances(Customer $user)
+    public static function getAcceptances(Customer $user, string $nationalId)
     {
-        return self::get(config("api.acceptances_path") . $user->mobile);
+        // National ID is mandatory: results are never fetched by phone alone.
+        $url = config("api.acceptances_path") . $user->mobile . "?national_id=" . urlencode($nationalId);
+        return self::get($url);
     }
 
     public static function sendSms($data)

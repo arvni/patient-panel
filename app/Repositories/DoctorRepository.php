@@ -44,11 +44,12 @@ class DoctorRepository implements DoctorRepositoryInterface
     /**
      * @return Builder[]|Collection
      */
-    public function getListDoctors($with=[])
+    public function getListDoctors($with = [])
     {
-        $query=$this->query;
-        if (count($with))
-            $this->query->with($with);
+        $query = $this->query;
+        if (count($with)) {
+            $query = $query->with($with);
+        }
         return $query->get();
     }
 

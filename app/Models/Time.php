@@ -18,28 +18,27 @@ class Time extends Model
         "price"
     ];
 
-    protected $casts=[
-        "disabled"=>"boolean",
-        "IS_ONLINE"=>"boolean",
+    protected $casts = [
+        "disabled" => "boolean",
+        "is_online" => "boolean",
     ];
-
 
     public function scopeInPerson($query)
     {
-        return $query->where("is_online",false);
+        return $query->where("is_online", false);
     }
 
-    public function Doctor()
+    public function doctor()
     {
         return $this->belongsTo(Doctor::class);
     }
 
-    public function AvailableTime()
+    public function availableTime()
     {
         return $this->belongsTo(AvailableTime::class);
     }
 
-    public function Reservation()
+    public function reservation()
     {
         return $this->hasOne(Reservation::class);
     }

@@ -33,23 +33,22 @@ class Reservation extends Authenticatable
         return boolval($this->verified_at);
     }
 
-    public function Time()
+    public function time()
     {
         return $this->belongsTo(Time::class);
     }
 
-    public function Doctor()
+    public function doctor()
     {
         return $this->hasOneThrough(Doctor::class, Time::class, "id", "id", "time_id", "doctor_id");
     }
 
-
-    public function Transaction()
+    public function transaction()
     {
         return $this->morphOne(Transaction::class, "related");
     }
 
-    public function Customer()
+    public function customer()
     {
         return $this->belongsTo(Customer::class);
     }

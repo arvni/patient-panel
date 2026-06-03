@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
+use App\Models\Customer;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -21,6 +23,14 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Gate to check if user can request a new OTP (2 minute cooldown)
+        Gate::define('requestForNewOTP', function (?Customer $user) {
+            if (!$user || !$user->last_otp_request) {
+                return true;
+            }
+
+            // Allow if 2 minutes have passed since last request
+            return Carbon::parse($user->last_otp_request)->addMinutes(2)->lessThan(Carbon::now());
+        });
     }
 }

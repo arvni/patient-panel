@@ -12,10 +12,15 @@ const groupButtonStyle = {
 
 const buttonStyle = {
     borderRadius: "30px !important",
-    paddingY: 4,
-    paddingX: 7.5,
+    paddingY: { xs: 2, sm: 4 },
+    paddingX: { xs: 3, sm: 7.5 },
     border: "1px solid",
     borderLeft: "1px solid !important",
+    minHeight: 44, // Mobile-friendly touch target
+    minWidth: { xs: "120px", sm: "150px" },
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     "&.Mui-selected": {
         background: "#2dc2dd",
         color: "white",
@@ -42,12 +47,31 @@ const DateGroupButton = ({
                                                            sx={buttonStyle}
                                                            value={item}
                                                            aria-label={item}>
-                <Typography color="#000"
-                            sx={{
-                                position:"absolute"
-                            }}>
-                    {item.split(",")[0]}<br/><strong>{item.split(", ")[1]}</strong>
-                </Typography>
+                <Stack spacing={0.5} alignItems="center">
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            color: selected == item ? "white" : "#000",
+                            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                            textAlign: "center",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {item.split(",")[0]}
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                        fontWeight="bold"
+                        sx={{
+                            color: selected == item ? "white" : "#000",
+                            fontSize: { xs: "0.875rem", sm: "1rem" },
+                            textAlign: "center",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {item.split(", ")[1]}
+                    </Typography>
+                </Stack>
             </ToggleButton>)}
         </ToggleButtonGroup>
     </Stack>

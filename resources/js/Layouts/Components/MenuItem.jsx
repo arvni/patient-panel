@@ -21,18 +21,24 @@ const listItemStyle = {
 };
 
 const MenuItem = ({onClick, selected, ...props}) => {
+    if (!props.href) return null;
+
     const handleOnClick = (href) => (e) => {
         e.preventDefault();
         onClick(href);
     }
-    return <ListItemButton {...props} sx={listItemStyle} onClick={handleOnClick(props.href)} href={route(props.href)}>
 
+    return <ListItemButton
+        {...props}
+        sx={listItemStyle}
+        onClick={handleOnClick(props.href)}
+    >
         <ListItemIcon>
             {props.badge ? <Badge color="primary" badgeContent={props.badge}>
-                {props.icon}
-            </Badge> : props.icon}
+                {props.icon || null}
+            </Badge> : (props.icon || null)}
         </ListItemIcon>
-        <ListItemText primary={props.title}/>
+        <ListItemText primary={props.title || ''}/>
     </ListItemButton>;
 }
 export default MenuItem;

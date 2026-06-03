@@ -1,6 +1,6 @@
 import GuestLayout from '@/Layouts/GuestLayout';
 import {useForm} from '@inertiajs/react';
-import {Button, Stack, TextField} from "@mui/material";
+import {Button, Stack, TextField, Typography} from "@mui/material";
 import CodeField from "@/Components/CodeField";
 import {CountdownCircleTimer} from 'react-countdown-circle-timer'
 import {useState} from "react";
@@ -42,36 +42,80 @@ function Verify({mobile}) {
         }
     });
     return (
-        <form onSubmit={submit}>
-            <Stack spacing={2}>
-                <TextField name="mobile"
-                           label="Mobile"
-                           value={data.mobile}
-                           autoComplete="mobile"
-                           helperText={errors.mobile}
-                           error={errors?.mobile}
-                           disabled
-                           required/>
-                <CodeField length={6}
-                           name="code"
-                           value={data.code}
-                           autoComplete="code"
-                           isFocused={true}
-                           onChange={setData}
-                           required/>
-                <Stack direction={"row"} spacing={4} alignItems={"center"} justifyContent={"space-between"}>
-                    {showResend ? <Button onClick={handleResendCode}>Resend Code</Button> : <CountdownCircleTimer
-                        size={70}
-                        isPlaying
-                        duration={120}
-                        colors={['#004777']} onComplete={handleShowResend}
+        <form onSubmit={submit} style={{ width: '100%' }}>
+            <Stack spacing={3}>
+                <TextField
+                    name="mobile"
+                    label="Mobile Number"
+                    value={data.mobile}
+                    autoComplete="tel"
+                    helperText={errors.mobile}
+                    error={!!errors?.mobile}
+                    disabled
+                    fullWidth
+                    required
+                />
+                <Stack spacing={1}>
+                    <Typography variant="body2" color="text.secondary" align="center">
+                        Enter the 6-digit code sent to your mobile
+                    </Typography>
+                    <CodeField
+                        length={6}
+                        name="code"
+                        value={data.code}
+                        autoComplete="one-time-code"
+                        isFocused={true}
+                        onChange={setData}
+                        required
+                    />
+                    {errors.code && (
+                        <Typography variant="caption" color="error" align="center">
+                            {errors.code}
+                        </Typography>
+                    )}
+                </Stack>
+                <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={2}
+                    alignItems="center"
+                    justifyContent="space-between"
+                >
+                    <Stack direction="row" spacing={1} alignItems="center">
+                        {showResend ? (
+                            <Button
+                                onClick={handleResendCode}
+                                disabled={processing}
+                                variant="outlined"
+                                fullWidth
+                            >
+                                Resend Code
+                            </Button>
+                        ) : (
+                            <>
+                                <CountdownCircleTimer
+                                    size={60}
+                                    isPlaying
+                                    duration={120}
+                                    colors={['#004777']}
+                                    onComplete={handleShowResend}
+                                >
+                                    {({remainingTime}) => (remainingTime / 60 | 0) + ":" + (remainingTime % 60).toString().padStart(2, '0')}
+                                </CountdownCircleTimer>
+                                <Typography variant="caption" color="text.secondary">
+                                    Time remaining
+                                </Typography>
+                            </>
+                        )}
+                    </Stack>
+                    <Button
+                        variant="contained"
+                        type="submit"
+                        disabled={processing}
+                        size="large"
+                        sx={{ minWidth: { xs: '100%', sm: '150px' } }}
                     >
-                        {({remainingTime}) => (remainingTime / 60 | 0) + ":" + remainingTime % 60}
-                    </CountdownCircleTimer>}
-                    <Button variant="contained" type="submit" disabled={processing}>
-                        Log in
+                        {processing ? 'Verifying...' : 'Verify & Login'}
                     </Button>
-
                 </Stack>
             </Stack>
         </form>

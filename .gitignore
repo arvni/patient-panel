@@ -18,3 +18,7 @@ yarn-error.log
 /.idea
 /.vscode
 googlecredential.json
+/.claude
+/Apps
+.DS_Store
+.env.docker

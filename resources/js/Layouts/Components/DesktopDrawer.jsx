@@ -20,7 +20,10 @@ const DesktopDrawer = ({toggleDrawer, list, onClick, permissions, open}) => {
         </Toolbar>
         <Divider/>
         <List component="nav">
-            {list.map((item, index) =><ListMenuItem key={index} onClick={onClick} {...item}/>)}
+            {list && list.length > 0 && list.map((item, index) => {
+                if (!item || !item.href) return null;
+                return <ListMenuItem key={index} onClick={onClick} {...item}/>
+            })}
         </List>
     </Drawer>
 }

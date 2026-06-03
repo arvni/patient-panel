@@ -13,12 +13,6 @@ const cardContentStyle = {
     }
 }
 
-const doctorImageStyle = {
-    borderRadius: "50%",
-    width: "150px",
-    height: "150px",
-}
-
 const DoctorCard = ({doctor, selected = false}) => {
     return <Card elevation={0} sx={{justifyContent: "center", display: "flex",background:"transparent"}}>
         <CardContent sx={cardContentStyle}>
@@ -32,7 +26,16 @@ const DoctorCard = ({doctor, selected = false}) => {
                                        zIndex: 100,
                                        boxShadow: "0px 0px 4px rgba(0,0,0,0.5)"
                                    }}>
-                <img src={doctor?.image} style={doctorImageStyle} alt={doctor?.title}/></Box>}
+                <Box
+                    component="img"
+                    src={doctor?.image}
+                    alt={doctor?.title}
+                    sx={{
+                        borderRadius: "50%",
+                        width: { xs: "100px", sm: "150px" },
+                        height: { xs: "100px", sm: "150px" },
+                    }}
+                /></Box>}
             <Stack className="card-title" sx={{
                 paddingY: 2,
                 paddingLeft: 10,
@@ -42,6 +45,11 @@ const DoctorCard = ({doctor, selected = false}) => {
                 zIndex: 99,
                 borderTopRightRadius: "2rem",
                 borderBottomRightRadius: "2rem",
+                '@media (max-width:600px)': {
+                    paddingLeft: 7,
+                    paddingRight: 2,
+                    marginLeft: -4,
+                },
             }}
                    spacing={1}>
                 <Typography fontWeight={"bold"}>{doctor?.title}</Typography>

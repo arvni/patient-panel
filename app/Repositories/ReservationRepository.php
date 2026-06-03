@@ -36,8 +36,14 @@ class ReservationRepository implements ReservationRepositoryInterface
     public function getAllReservations(array $queryData = []): LengthAwarePaginator
     {
         $this->query
-            ->with(["Time", "Customer"])
+            ->with(["Time.Doctor:id,title,subtitle,specialty,image", "Customer"])
             ->withAggregate("Doctor as doctor_title", "doctors.title");
+
+        // Apply customer filter if provided
+        if (isset($queryData["customer_id"])) {
+            $this->query->where("customer_id", $queryData["customer_id"]);
+        }
+
         if (isset($queryData["filter"]))
             $this->applyFilter($queryData["filter"]);
         if (isset($queryData["orderBy"])) {
@@ -62,6 +68,9 @@ class ReservationRepository implements ReservationRepositoryInterface
 
     private function applyFilter(array $filter)
     {
+        if (isset($filter["customer_id"])) {
+            $this->query->where("customer_id", $filter["customer_id"]);
+        }
         if (isset($filter["doctor"])) {
             $this->query->whereHas("Doctor", function ($q) use ($filter) {
                 $q->where("id", $filter["doctor"]["id"]);

@@ -5,81 +5,95 @@ import {
     CardContent,
     CardHeader,
     Collapse,
+    Box,
+    IconButton,
+    Fade,
 } from "@mui/material";
-import {router} from "@inertiajs/react";
+import {ArrowBack} from "@mui/icons-material";
 
-
-const boxStyle = {
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    margin: 0,
-    height: "calc(100dvh - 1rem)",
-    justifyContent: "space-between",
-    overflow: "hidden",
-    background: "transparent"
-}
 const SectionLayout = ({component, title, show, handleBack, handleExit, actions = []}) => {
-
     const hasAction = (handleExit || handleBack || Boolean(actions.length));
-    return <Collapse in={show} unmountOnExit>
-        <Card sx={boxStyle} elevation={0}>
-            <CardHeader sx={{
-                width: "100%",
-                position: "relative",
-                textAlign: "center",
-                justifyContent: "center",
-                top: 0,
-                height: "10%",
-                padding: 0,
-                borderBottom: "1px solid",
-                " div.MuiCardHeader-content": {
-                    position: "absolute",
-                }
-            }}
+
+    return (
+        <Fade in={show} timeout={300}>
+            <Box sx={{ display: show ? 'block' : 'none' }}>
+                <Card
+                    elevation={0}
+                    sx={{
+                        background: 'transparent',
+                        mb: 0,
+                    }}
+                >
+                    {/* Compact Header with Back Button */}
+                    <CardHeader
+                        sx={{
+                            py: { xs: 1.5, md: 2 },
+                            px: { xs: 1, md: 2 },
+                            borderBottom: '2px solid',
+                            borderColor: 'primary.main',
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(245,245,245,0.9) 100%)',
+                        }}
+                        avatar={
+                            handleBack && (
+                                <IconButton
+                                    onClick={handleBack}
+                                    size="small"
+                                    sx={{
+                                        bgcolor: 'primary.main',
+                                        color: 'white',
+                                        '&:hover': { bgcolor: 'primary.dark' }
+                                    }}
+                                >
+                                    <ArrowBack />
+                                </IconButton>
+                            )
+                        }
                         title={title}
                         titleTypographyProps={{
-                            color: "black",
-                            textAlign: "center",
-                            fontWeight: "900",
+                            variant: 'h6',
+                            fontWeight: 700,
+                            color: 'text.primary',
+                            fontSize: { xs: '1rem', md: '1.25rem' }
                         }}
-            />
-            <CardContent sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                height: hasAction ? "80%" : "90%",
-                alignItems:"center"
+                    />
 
-            }}>
-                {component}
-            </CardContent>
-            {hasAction ? <CardActions sx={{
-                width: "100%",
-                borderBottomLeftRadius: "25px",
-                borderBottomRightRadius: "25px",
-                height: "10%",
-                borderTop: "1px solid",
-                justifyContent: "space-around",
-            }}>
-                {handleExit ? <Button variant="contained"
-                                      size="large"
-                                      color="grey"
-                                      sx={{fontColor: "#fff", borderRadius: "20px"}}
-                                      onClick={handleExit}>Exit</Button> :null}
-                {handleBack ? <Button variant="contained"
-                                          onClick={handleBack}
-                                          size="large"
-                                          color="grey"
-                                          sx={{
-                                              fontColor: "#fff",
-                                              borderRadius: "20px"
-                                          }}>Back</Button>:null}
-                {actions}
-            </CardActions> : null}
-        </Card>
-    </Collapse>
+                    {/* Compact Content Area */}
+                    <CardContent
+                        sx={{
+                            p: { xs: 2, md: 3 },
+                            '&:last-child': { pb: { xs: 2, md: 3 } },
+                            minHeight: 'auto',
+                        }}
+                    >
+                        {component}
+                    </CardContent>
 
+                    {/* Actions Footer - Only if Exit or custom actions */}
+                    {(handleExit || actions.length > 0) && (
+                        <CardActions
+                            sx={{
+                                p: 2,
+                                pt: 0,
+                                justifyContent: 'flex-end',
+                                gap: 1,
+                            }}
+                        >
+                            {handleExit && (
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleExit}
+                                    sx={{ borderRadius: 2 }}
+                                >
+                                    Exit
+                                </Button>
+                            )}
+                            {actions}
+                        </CardActions>
+                    )}
+                </Card>
+            </Box>
+        </Fade>
+    );
 }
+
 export default SectionLayout;

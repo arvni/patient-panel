@@ -71,10 +71,64 @@ class OtpService
 
     protected function checkOtpByOmanTel($mobile, $code)
     {
+        \Log::info("OTP Verification Attempt", [
+            'mobile' => $mobile,
+            'code_length' => strlen($code),
+        ]);
+
         $verificationRequest = VerificationRequest::where("mobile", $mobile)->first();
-        if (!$verificationRequest)
+
+        if (!$verificationRequest) {
+            \Log::error("OTP Verification Failed: No verification request found for mobile: " . $mobile);
             return false;
-        return OtpManager::verify($mobile, $code, $verificationRequest->trackingCode);
+        }
+
+        \Log::info("Verification Request Found", [
+            'mobile' => $mobile,
+            'trackingCode' => $verificationRequest->trackingCode,
+            'expires_at' => $verificationRequest->expires_at,
+            'failed_attempts' => $verificationRequest->failed_attempts ?? 0,
+            'locked' => $verificationRequest->locked
+        ]);
+
+        // Check if OTP has expired
+        if ($verificationRequest->expires_at && now()->greaterThan($verificationRequest->expires_at)) {
+            \Log::warning("OTP Verification Failed: OTP expired for mobile: " . $mobile . " (expired at: " . $verificationRequest->expires_at . ")");
+            return false;
+        }
+
+        // Check if account is locked due to too many failed attempts
+        if ($verificationRequest->locked || ($verificationRequest->failed_attempts ?? 0) >= 5) {
+            \Log::warning("OTP Verification Failed: Account locked for mobile: " . $mobile . " (failed_attempts: " . $verificationRequest->failed_attempts . ")");
+            return false;
+        }
+
+        // Verify OTP with the OtpManager
+        $isValid = OtpManager::verify($mobile, $code, $verificationRequest->trackingCode);
+
+        if (!$isValid) {
+            \Log::warning("OTP Verification Failed: Invalid OTP code for mobile: " . $mobile . " (attempt: " . (($verificationRequest->failed_attempts ?? 0) + 1) . ")");
+        } else {
+            \Log::info("OTP Verification Success: Valid OTP for mobile: " . $mobile);
+        }
+
+        // Increment failed attempts if OTP is invalid
+        if (!$isValid) {
+            $verificationRequest->increment('failed_attempts');
+
+            // Lock account after 5 failed attempts
+            if (($verificationRequest->failed_attempts ?? 0) >= 5) {
+                $verificationRequest->update(['locked' => true]);
+            }
+        } else {
+            // Reset counter and failed attempts on successful verification
+            $verificationRequest->update([
+                'counter' => 0,
+                'failed_attempts' => 0
+            ]);
+        }
+
+        return $isValid;
     }
 
 

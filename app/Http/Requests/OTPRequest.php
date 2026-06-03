@@ -42,28 +42,69 @@ class OTPRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
+        // Check both IP-based and mobile-based rate limiting
+        $ipKey = $this->ipThrottleKey();
+        $mobileKey = $this->mobileThrottleKey();
+
+        // IP-based: max 10 requests per 10 minutes
+        if (RateLimiter::tooManyAttempts($ipKey, 10)) {
+            event(new Lockout($this));
+
+            $seconds = RateLimiter::availableIn($ipKey);
+
+            throw ValidationException::withMessages([
+                'mobile' => trans('auth.throttle', [
+                    'seconds' => $seconds,
+                    'minutes' => ceil($seconds / 60),
+                ]),
+            ]);
         }
 
-        event(new Lockout($this));
+        // Mobile-based: max 5 requests per 10 minutes per phone number
+        if (RateLimiter::tooManyAttempts($mobileKey, 5)) {
+            event(new Lockout($this));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+            $seconds = RateLimiter::availableIn($mobileKey);
 
-        throw ValidationException::withMessages([
-            'mobile' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
+            throw ValidationException::withMessages([
+                'mobile' => trans('auth.throttle', [
+                    'seconds' => $seconds,
+                    'minutes' => ceil($seconds / 60),
+                ]),
+            ]);
+        }
+
+        // Hit both rate limiters
+        RateLimiter::hit($ipKey, 600); // 10 minutes decay
+        RateLimiter::hit($mobileKey, 600); // 10 minutes decay
+    }
+
+    /**
+     * Get the IP-based rate limiting throttle key for the request.
+     */
+    protected function ipThrottleKey(): string
+    {
+        return 'otp-request-ip:' . Str::transliterate($this->ip());
+    }
+
+    /**
+     * Get the mobile-based rate limiting throttle key for the request.
+     */
+    protected function mobileThrottleKey(): string
+    {
+        // Key off the *normalised* number so that submitting the same phone
+        // number in different formats (91234567, +96891234567, 0096891234567)
+        // cannot be used to bypass the per-mobile rate limit.
+        return 'otp-request-mobile:' . Str::transliterate($this->getMobile());
     }
 
     /**
      * Get the rate limiting throttle key for the request.
+     * @deprecated Use ipThrottleKey() and mobileThrottleKey() instead
      */
     public function throttleKey(): string
     {
-        return Str::transliterate($this->ip());
+        return $this->ipThrottleKey();
     }
 
     public function getMobile()

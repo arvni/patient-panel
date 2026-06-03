@@ -18,14 +18,17 @@ class SendVerificationSMS implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Create a new job instance.
+     * The mobile number to send OTP to.
      */
-
     public $mobile;
 
+    /**
+     * Create a new job instance.
+     */
     public function __construct($mobile)
     {
         $this->mobile = $mobile;
+        $this->onConnection('sync'); // Force synchronous execution
     }
 
     /**
@@ -35,12 +38,15 @@ class SendVerificationSMS implements ShouldQueue
     {
         try {
             $verificationRequest = VerificationRequest::whereMobile($this->mobile)->first();
+            $expiresAt = now()->addMinutes(10); // OTP expires in 10 minutes
 
             if (!$verificationRequest) {
                 $code = OtpManager::send($this->mobile);
                 VerificationRequest::create([
                     "mobile" => $this->mobile,
-                    "trackingCode" => $code->trackingCode
+                    "trackingCode" => $code->trackingCode,
+                    "expires_at" => $expiresAt,
+                    "failed_attempts" => 0
                 ]);
             }
             else {
@@ -48,7 +54,9 @@ class SendVerificationSMS implements ShouldQueue
                 $verificationRequest->update([
                     "counter" => $verificationRequest->counter + 1,
                     "trackingCode" => $code->trackingCode,
-                    "locked" => $verificationRequest->counter > 2
+                    "locked" => false, // Unlock account when new OTP is requested
+                    "expires_at" => $expiresAt,
+                    "failed_attempts" => 0 // Reset failed attempts on new OTP
                 ]);
             }
             OtpService::senOtp( $this->mobile,$code->code);

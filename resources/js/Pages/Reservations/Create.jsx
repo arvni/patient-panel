@@ -3,7 +3,15 @@ import {useForm} from '@inertiajs/react';
 
 import {
     Backdrop,
+    Box,
     CircularProgress,
+    MobileStepper,
+    Paper,
+    Step,
+    StepLabel,
+    Stepper,
+    useMediaQuery,
+    useTheme
 } from "@mui/material";
 import {TransitionGroup} from "react-transition-group";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
@@ -16,6 +24,8 @@ import ReservationTypeSection from "./Components/ReservationTypeSection.jsx";
 import TimeGroupButton from "./Components/TimeGroupButton.jsx";
 
 function Create({doctors = []}) {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [days, setDays] = useState([]);
     const [times, setTimes] = useState([])
     const [loading, setLoading] = useState(false)
@@ -27,6 +37,14 @@ function Create({doctors = []}) {
         time: null,
         day: null
     });
+
+    const steps = [
+        'Visit Type',
+        'Choose Doctor',
+        'Select Day',
+        'Pick Time',
+        'Confirm'
+    ];
     const handleSubmit = e => {
         e.preventDefault();
         clearErrors();
@@ -79,57 +97,129 @@ function Create({doctors = []}) {
         e.preventDefault();
         setData(previousData => ({...previousData, step: previousData.step - 1}));
     }
-    return (<>
-            <TransitionGroup>
-                <SectionLayout show={data.step === 1}
-                               title="Please choose a Visit Type"
-                               component={<ReservationTypeSection
-                                   onSelect={handleTypeChanged}
-                                   selectedType={data.type}/>}
+    return (
+        <Box sx={{ pb: { xs: 2, md: 0 } }}>
+            {/* Compact Progress Indicator */}
+            <Paper
+                elevation={2}
+                sx={{
+                    mb: 2,
+                    p: { xs: 1.5, md: 2 },
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                }}
+            >
+                {isMobile ? (
+                    <MobileStepper
+                        variant="progress"
+                        steps={5}
+                        position="static"
+                        activeStep={data.step - 1}
+                        sx={{
+                            background: 'transparent',
+                            p: 0,
+                            '& .MuiMobileStepper-progress': {
+                                width: '100%',
+                                backgroundColor: 'rgba(255,255,255,0.3)',
+                            },
+                            '& .MuiLinearProgress-bar': {
+                                backgroundColor: 'white',
+                            }
+                        }}
+                    />
+                ) : (
+                    <Stepper
+                        activeStep={data.step - 1}
+                        alternativeLabel
+                        sx={{
+                            '& .MuiStepLabel-root .Mui-completed': {
+                                color: 'success.light',
+                            },
+                            '& .MuiStepLabel-root .Mui-active': {
+                                color: 'white',
+                            },
+                            '& .MuiStepLabel-label': {
+                                color: 'rgba(255,255,255,0.7)',
+                            },
+                            '& .MuiStepLabel-label.Mui-active': {
+                                color: 'white',
+                                fontWeight: 600,
+                            },
+                        }}
+                    >
+                        {steps.map((label) => (
+                            <Step key={label}>
+                                <StepLabel>{label}</StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                )}
+            </Paper>
+
+            {/* Step Content - No TransitionGroup wrapper */}
+            <Box>
+                <SectionLayout
+                    show={data.step === 1}
+                    title="Choose Visit Type"
+                    component={<ReservationTypeSection
+                        onSelect={handleTypeChanged}
+                        selectedType={data.type}
+                    />}
                 />
-                <SectionLayout show={data.step === 2}
-                               title="Please choose a Doctor"
-                               handleBack={handleBack}
-                               component={<DoctorSection
-                                   onSelect={handleDoctorChange}
-                                   doctors={doctors}
-                                   selectedDoctor={data.doctor}/>}
+                <SectionLayout
+                    show={data.step === 2}
+                    title="Select Your Doctor"
+                    handleBack={handleBack}
+                    component={<DoctorSection
+                        onSelect={handleDoctorChange}
+                        doctors={doctors}
+                        selectedDoctor={data.doctor}
+                    />}
                 />
-                <SectionLayout show={data.step === 3}
-                               title="Please choose a Day"
-                               handleBack={handleBack}
-                               component={<DateGroupButton onSelect={handleDaySelected}
-                                                           doctor={data.doctor}
-                                                           valueAccessor="value"
-                                                           loading={loading}
-                                                           selected={data.day}
-                                                           items={days}/>}
+                <SectionLayout
+                    show={data.step === 3}
+                    title="Pick Available Day"
+                    handleBack={handleBack}
+                    component={<DateGroupButton
+                        onSelect={handleDaySelected}
+                        doctor={data.doctor}
+                        valueAccessor="value"
+                        loading={loading}
+                        selected={data.day}
+                        items={days}
+                    />}
                 />
-                <SectionLayout show={data.step === 4}
-                               title="Please choose a Time"
-                               handleBack={handleBack}
-                               component={<TimeGroupButton doctor={data.doctor}
-                                                           valueAccessor="value"
-                                                           times={times}
-                                                           time={data.time}
-                                                           onTimeChange={handleTimeChange}
-                                                           loading={loading}/>}
+                <SectionLayout
+                    show={data.step === 4}
+                    title="Choose Appointment Time"
+                    handleBack={handleBack}
+                    component={<TimeGroupButton
+                        doctor={data.doctor}
+                        valueAccessor="value"
+                        times={times}
+                        time={data.time}
+                        onTimeChange={handleTimeChange}
+                        loading={loading}
+                    />}
                 />
-                <SectionLayout show={data.step === 5}
-                               title="Fill The Form"
-                               handleBack={handleBack}
-                               component={<InformationSection
-                                   data={data}
-                                   errors={errors}
-                                   onSubmit={handleSubmit}
-                                   onChange={handleChange}
-                                   show={data.step === 5}/>}
+                <SectionLayout
+                    show={data.step === 5}
+                    title="Confirm Your Booking"
+                    handleBack={handleBack}
+                    component={<InformationSection
+                        data={data}
+                        errors={errors}
+                        onSubmit={handleSubmit}
+                        onChange={handleChange}
+                        show={data.step === 5}
+                    />}
                 />
-            </TransitionGroup>
-            <Backdrop open={processing || loading}>
-                <CircularProgress/>
+            </Box>
+
+            <Backdrop open={processing || loading} sx={{ zIndex: theme.zIndex.drawer + 1 }}>
+                <CircularProgress />
             </Backdrop>
-        </>
+        </Box>
     );
 }
 

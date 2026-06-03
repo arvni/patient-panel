@@ -26,8 +26,8 @@ const Show = ({paymentMessage, reservation, timeCardData}) => {
                           component={<>
                               <Box sx={{
                                   mt: 1,
-                                  mx: 2,
-                                  px: 4,
+                                  mx: { xs: 1, sm: 2 },
+                                  px: { xs: 2, sm: 4 },
                                   borderRadius: 4,
                                   display: "flex",
                                   flexDirection: "column",
@@ -43,7 +43,7 @@ const Show = ({paymentMessage, reservation, timeCardData}) => {
                                           mt: "10px"
                                       }}>
                                           <ListItemAvatar sx={{
-                                              width: "80px",
+                                              width: { xs: "60px", sm: "80px" },
                                               height: "30px",
                                               alignItems: "center",
                                               background: "white",
@@ -52,11 +52,11 @@ const Show = ({paymentMessage, reservation, timeCardData}) => {
                                               borderRadius: "10px",
                                               boxShadow: "0px 0px 5px 0px rgba(0,0,0,0.5)"
                                           }}>
-                                              <PhoneAndroid sx={{fontSize: 30}}/>
+                                              <PhoneAndroid sx={{ fontSize: { xs: 24, sm: 30 } }}/>
                                           </ListItemAvatar>
                                           <ListItemText>
                                               <Typography textAlign="center"
-                                                          fontSize="18px">{reservation?.customer?.mobile}</Typography>
+                                                          fontSize={{ xs: "16px", sm: "18px" }}>{reservation?.customer?.mobile}</Typography>
                                           </ListItemText>
                                       </ListItem>
                                       <ListItem sx={{
@@ -66,7 +66,7 @@ const Show = ({paymentMessage, reservation, timeCardData}) => {
                                           mt: "10px"
                                       }}>
                                           <ListItemAvatar sx={{
-                                              width: "80px",
+                                              width: { xs: "60px", sm: "80px" },
                                               height: "30px",
                                               alignItems: "center",
                                               background: "white",
@@ -75,11 +75,11 @@ const Show = ({paymentMessage, reservation, timeCardData}) => {
                                               borderRadius: "10px",
                                               boxShadow: "0px 0px 5px 0px rgba(0,0,0,0.5)"
                                           }}>
-                                              <Typography fontSize="30">Type</Typography>
+                                              <Typography fontSize={{ xs: "20px", sm: "30px" }}>Type</Typography>
                                           </ListItemAvatar>
                                           <ListItemText>
                                               <Typography textAlign="center"
-                                                          fontSize="18px">{reservation.type == 2 ? "Online" : "In Person"}</Typography>
+                                                          fontSize={{ xs: "16px", sm: "18px" }}>{reservation.type == 2 ? "Online" : "In Person"}</Typography>
                                           </ListItemText>
                                       </ListItem>
                                       <ListItem sx={{
@@ -89,7 +89,7 @@ const Show = ({paymentMessage, reservation, timeCardData}) => {
                                           mt: "10px"
                                       }}>
                                           <ListItemAvatar sx={{
-                                              width: "80px",
+                                              width: { xs: "60px", sm: "80px" },
                                               height: "30px",
                                               alignItems: "center",
                                               background: "white",
@@ -98,11 +98,11 @@ const Show = ({paymentMessage, reservation, timeCardData}) => {
                                               borderRadius: "10px",
                                               boxShadow: "0px 0px 5px 0px rgba(0,0,0,0.5)"
                                           }}>
-                                              <Typography fontSize="30">Cost</Typography>
+                                              <Typography fontSize={{ xs: "20px", sm: "30px" }}>Cost</Typography>
                                           </ListItemAvatar>
                                           <ListItemText>
                                               <Typography textAlign="center"
-                                                          fontSize="18px">OMR {Intl.NumberFormat().format(reservation.time.price)}</Typography>
+                                                          fontSize={{ xs: "16px", sm: "18px" }}>OMR {Intl.NumberFormat().format(reservation.time.price)}</Typography>
                                           </ListItemText>
                                       </ListItem>
                                       <ListItem sx={{mt: 3, p: 0}}>

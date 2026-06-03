@@ -29,7 +29,7 @@ class LoginRequest extends FormRequest
     {
         return [
             'mobile' => ["required", "exists:customers,mobile"],
-            'code' => ["required", "size:6"]
+            'code' => ["required", "digits:6"]
         ];
     }
 
@@ -42,11 +42,25 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (!$this->checkOTP()) {
+        $otpResult = $this->checkOTP();
+
+        if (!$otpResult) {
             RateLimiter::hit($this->throttleKey());
 
+            $attempts = RateLimiter::attempts($this->throttleKey());
+
+            // Log the failed attempt for debugging
+            \Log::warning('OTP authentication failed', [
+                'mobile' => $this->input('mobile'),
+                'code_length' => strlen($this->input('code')),
+                'attempts' => $attempts,
+                'ip' => $this->ip()
+            ]);
+
             throw ValidationException::withMessages([
-                'mobile' => trans('auth.failed'),
+                'code' => $attempts >= 3
+                    ? trans('auth.failed_multiple', ['attempts' => 5 - $attempts])
+                    : trans('auth.failed'),
             ]);
         }
 

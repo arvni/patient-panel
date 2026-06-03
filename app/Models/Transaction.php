@@ -21,9 +21,9 @@ class Transaction extends Model
         "type" => TransactionType::class
     ];
 
-    public function getCreatedAtAttribute()
+    public function getCreatedAtAttribute($value)
     {
-        return Carbon::parse($this->crated_at, "Asia/Muscat")->format("Y-m-d H:i:s");
+        return Carbon::parse($value, "Asia/Muscat")->format("Y-m-d H:i:s");
     }
 
     public function related()
@@ -31,7 +31,7 @@ class Transaction extends Model
         return $this->morphTo();
     }
 
-    public function Customer()
+    public function customer()
     {
         return $this->belongsTo(Customer::class);
     }

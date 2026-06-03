@@ -16,18 +16,18 @@ class Payment extends Model
         "information",
     ];
 
-    protected $casts=[
-        "information"=>"json"
+    protected $casts = [
+        "information" => "json"
     ];
 
-    public function Customer()
+    public function customer()
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function Transaction()
+    public function transaction()
     {
-        return $this->morphOne(Transaction::class,"related");
+        return $this->morphOne(Transaction::class, "related");
     }
 
 }

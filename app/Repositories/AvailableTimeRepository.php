@@ -19,12 +19,17 @@ class AvailableTimeRepository implements AvailableTimeRepositoryInterface
      */
     private Builder $query;
 
-    private const Session_Time = 30;
-
-
     public function __construct(AvailableTime $availableTime)
     {
         $this->query = $availableTime->newQuery();
+    }
+
+    /**
+     * Get the session duration from config
+     */
+    private function getSessionDuration(): int
+    {
+        return config('reservation.session_duration', 30);
     }
 
     /**
@@ -157,16 +162,18 @@ class AvailableTimeRepository implements AvailableTimeRepositoryInterface
 
     private function createTimes(AvailableTime $availableTime, Carbon $start, Carbon $end): void
     {
-        $tmp = $start->clone()->addMinutes(self::Session_Time);
+        $sessionDuration = $this->getSessionDuration();
+        $tmp = $start->clone()->addMinutes($sessionDuration);
         while ($tmp <= $end) {
             if ($this->isTimeSlotAvailable($availableTime, $start, $tmp)) {
                 $this->createTime($availableTime, $start, $tmp);
             }
             $start = $tmp;
-            $tmp = $start->clone()->addMinutes(self::Session_Time);
+            $tmp = $start->clone()->addMinutes($sessionDuration);
         }
-        if ($availableTime->only_online)
-        $availableTime->Times()->update(["is_online"=>$availableTime->only_online]);
+        if ($availableTime->only_online) {
+            $availableTime->times()->update(["is_online" => $availableTime->only_online]);
+        }
     }
 
     private function deleteRelatedTimes(AvailableTime $availableTime, $oldStartedAt = null, $oldEndedAt = null)

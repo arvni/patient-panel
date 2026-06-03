@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Models\Acceptance;
 use App\Models\AcceptanceItem;
 use App\Models\Customer;
-use App\Models\User;
+use App\Models\CustomerNationalId;
 use App\Services\ApiService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,30 +13,18 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class GetPatientTests implements ShouldQueue//, ShouldBeUnique
+class GetPatientTests implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * The number of seconds after which the job's unique lock will be released.
-     *
-     * @var int
-     */
-//    public $uniqueFor = 3600;
-
-    /**
-     * Get the unique ID for the job.
-     */
-//    public function uniqueId(): string
-//    {
-//        return $this->user->mobile;
-//    }
-
-    /**
      * Create a new job instance.
+     *
      * @param Customer $user
+     * @param string $nationalId The national ID (patient idNo) whose results to sync.
+     *                           Required: results are never synced by phone alone.
      */
-    public function __construct(public Customer $user,)
+    public function __construct(public Customer $user, public string $nationalId)
     {
         //
     }
@@ -52,12 +40,15 @@ class GetPatientTests implements ShouldQueue//, ShouldBeUnique
     private function updateAcceptances()
     {
         $user = $this->user;
-        $response = ApiService::getAcceptances($this->user);
+        $response = ApiService::getAcceptances($user, $this->nationalId);
         if ($response->ok()) {
             $patient = $response->json("patient");
-            $user->fill(["name" => $patient["fullName"]]);
-            if ($this->user->isDirty())
-                $this->user->save();
+
+            // Keep the stored name for this national ID fresh.
+            CustomerNationalId::where("customer_id", $user->id)
+                ->where("national_id", $this->nationalId)
+                ->update(["name" => $patient["fullName"] ?? null]);
+
             $acceptanceIds = [];
             foreach ($patient["acceptances"] as $acceptanceData) {
                 $acceptance = Acceptance::where("server_id", $acceptanceData['id'])->first();
@@ -67,39 +58,48 @@ class GetPatientTests implements ShouldQueue//, ShouldBeUnique
 
                 $acceptance->fill([
                     "server_id" => $acceptanceData["id"],
+                    "national_id" => $this->nationalId,
                     "status" => $acceptanceData["status"],
                     "created_at" => $acceptanceData["created_at"],
                     "updated_at" => $acceptanceData["updated_at"]
                 ]);
-                $acceptance->Customer()->associate($user->id);
+                $acceptance->customer()->associate($user->id);
                 if ($acceptance->isDirty())
                     $acceptance->save();
                 $ids = [];
                 foreach ($acceptanceData["acceptance_items"] as $acceptanceItemData) {
-                    $acceptanceItem = $acceptance->AcceptanceItems()->where("server_id", $acceptanceItemData["id"])->first();
+                    $acceptanceItem = $acceptance->acceptanceItems()->where("server_id", $acceptanceItemData["id"])->first();
                     if (!$acceptanceItem)
                         $acceptanceItem = new AcceptanceItem();
                     $acceptanceItem->fill([
                         "server_id" => $acceptanceItemData["id"],
-                        "test" => $acceptanceItemData["method"]["test"]["name"],
-                        "status" => $acceptanceItemData["status"],
-                        "timeline" => $this->convertTimeline($acceptanceItemData["timeline"]),
+                        "test" => data_get($acceptanceItemData, "test.name"),
+                        // The lab returns a null status for items whose method
+                        // has no workflow yet; fall back to the earliest state so
+                        // the non-null enum column accepts it.
+                        "status" => data_get($acceptanceItemData, "status") ?? "registering",
+                        "timeline" => $this->convertTimeline($acceptanceItemData["timeline"] ?? []),
                         "report" => isset($acceptanceItemData["report"]) ? $acceptanceItemData["report"]["id"] : null,
                         "created_at" => $acceptanceData["created_at"],
                         "updated_at" => $acceptanceData["updated_at"]
                     ]);
-                    $acceptanceItem->Acceptance()->associate($acceptance->id);
+                    $acceptanceItem->acceptance()->associate($acceptance->id);
                     if ($acceptanceItem->isDirty())
                         $acceptanceItem->save();
                     $ids[] = $acceptanceItemData["id"];
                 }
-                $acceptance->AcceptanceItems()->whereNotIn("server_id", $ids)->delete();
+                $acceptance->acceptanceItems()->whereNotIn("server_id", $ids)->delete();
                 $acceptanceIds[] = $acceptanceData["id"];
             }
-            $user->Acceptances()->whereNotIn("server_id", $acceptanceIds)->delete();
-        } elseif ($response->notFound() === 404)
-            $user->Acceptances()->delete();
-
+            // Only prune results belonging to this national ID, so other
+            // national IDs stored for the same customer are left untouched.
+            $user->acceptances()
+                ->where("national_id", $this->nationalId)
+                ->whereNotIn("server_id", $acceptanceIds)
+                ->delete();
+        } elseif ($response->notFound()) {
+            $user->acceptances()->where("national_id", $this->nationalId)->delete();
+        }
     }
 
 

@@ -13,10 +13,13 @@ class VerificationRequest extends Model
         "mobile",
         "counter",
         "locked",
-        "trackingCode"
+        "trackingCode",
+        "expires_at",
+        "failed_attempts"
     ];
 
     protected $casts = [
-        "locked" => "boolean"
+        "locked" => "boolean",
+        "expires_at" => "datetime"
     ];
 }

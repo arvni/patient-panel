@@ -1,6 +1,6 @@
 import {
     Box, Button, Card, CardContent, FormHelperText,
-    Grid, InputAdornment,OutlinedInput, Typography
+    Grid, InputAdornment, OutlinedInput, Typography, Alert, Stack
 } from "@mui/material";
 
 import SectionLayout from "./SectionLayout.jsx";
@@ -17,13 +17,9 @@ const cardContentStyle = {
     }
 }
 
-const doctorImageStyle = {
-    borderRadius: "50%",
-    width: "150px",
-    height: "150px",
-}
+export const TimeCard = ({data = {}}) => {
+    const { doctor = {}, day, time = {} } = data;
 
-export const TimeCard = ({data:{doctor,day,time}}) => {
     return <Card elevation={0} sx={{justifyContent:"center",display:"flex", background:"transparent"}}>
         <CardContent sx={cardContentStyle}>
             {doctor?.image && <Box className="image-box"
@@ -36,7 +32,16 @@ export const TimeCard = ({data:{doctor,day,time}}) => {
                                        zIndex: 100,
                                        boxShadow: "0px 0px 4px rgba(0,0,0,0.5)"
                                    }}>
-                <img src={doctor?.image} style={doctorImageStyle} alt={doctor?.title}/></Box>}
+                <Box
+                    component="img"
+                    src={doctor?.image}
+                    alt={doctor?.title}
+                    sx={{
+                        borderRadius: "50%",
+                        width: { xs: "100px", sm: "150px" },
+                        height: { xs: "100px", sm: "150px" },
+                    }}
+                /></Box>}
             <Grid container className="card-title" sx={{
                 padding:0,
                 zIndex: 99,
@@ -48,8 +53,8 @@ export const TimeCard = ({data:{doctor,day,time}}) => {
                           background:"linear-gradient(90deg,#1a96c7,#0361ac)",
                           borderTopRightRadius: "2rem",
                           paddingY: 2,
-                          paddingLeft: "80px !important",
-                          paddingRight:4,
+                          paddingLeft: { xs: "60px !important", sm: "80px !important" },
+                          paddingRight: { xs: 2, sm: 4 },
                       }}>
                 <Typography textAlign="center"
                             fontWeight="bold"
@@ -58,13 +63,13 @@ export const TimeCard = ({data:{doctor,day,time}}) => {
                 <Grid item xs={12}
                       sx={{
                           borderBottomRightRadius: "2rem",
-                          paddingLeft: "80px !important",
-                          paddingRight:4,
+                          paddingLeft: { xs: "60px !important", sm: "80px !important" },
+                          paddingRight: { xs: 2, sm: 4 },
                           paddingY:1,
                           background:"#f0f0f0",
                       }}>
                     <Typography textAlign="center" fontWeight="900">{day}</Typography>
-                    <Typography textAlign="center" >{time.title}</Typography>
+                    <Typography textAlign="center" >{time?.title}</Typography>
                 </Grid>
             </Grid>
         </CardContent>
@@ -72,6 +77,7 @@ export const TimeCard = ({data:{doctor,day,time}}) => {
 }
 
 const InformationSection = ({data, onChange, onSubmit, errors}) => {
+    const hasErrors = errors && Object.keys(errors).length > 0;
 
     return <Box component="form"
                 onSubmit={onSubmit}
@@ -84,18 +90,43 @@ const InformationSection = ({data, onChange, onSubmit, errors}) => {
                     alignItems: "center",
                     justifyContent: "center"
                 }}>
-        <Grid container spacing={2}>
-            <Grid item xs={12}>
-                <TimeCard data={data}/>
-            </Grid>
-        </Grid>
-        <Button type="submit"
+        <Stack spacing={2} sx={{ width: "100%" }}>
+            {/* Error Display */}
+            {hasErrors && (
+                <Alert severity="error" sx={{ width: "100%" }}>
+                    <Stack spacing={0.5}>
+                        <Typography variant="subtitle2" fontWeight="bold">
+                            Please correct the following errors:
+                        </Typography>
+                        {Object.entries(errors).map(([field, messages]) => (
+                            <Typography key={field} variant="body2">
+                                • {Array.isArray(messages) ? messages[0] : messages}
+                            </Typography>
+                        ))}
+                    </Stack>
+                </Alert>
+            )}
+
+            {/* Booking Summary */}
+            <TimeCard data={data}/>
+
+            {/* Confirm Button */}
+            <Button
+                type="submit"
                 fullWidth
                 variant="contained"
-                sx={{mt: 3, mb: 2}}
-        >
-            Sign Up
-        </Button>
+                size="large"
+                sx={{
+                    mt: 2,
+                    py: 1.5,
+                    fontSize: "1.1rem",
+                    fontWeight: "bold",
+                    textTransform: "none",
+                }}
+            >
+                Confirm Booking
+            </Button>
+        </Stack>
     </Box>
 }
 

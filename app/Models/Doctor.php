@@ -21,23 +21,23 @@ class Doctor extends Model
         "default_time_table" => "json"
     ];
 
-    public function User()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function Times()
+    public function times()
     {
         return $this->hasMany(Time::class);
     }
 
-    public function AvailableTimes()
+    public function availableTimes()
     {
         return $this->hasMany(AvailableTime::class);
     }
 
-    public function Reservations()
+    public function reservations()
     {
-        return $this->hasManyThrough(Reservation::class, Time::class)->with("Time");
+        return $this->hasManyThrough(Reservation::class, Time::class)->with("time");
     }
 }

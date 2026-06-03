@@ -61,10 +61,10 @@ class ReservationController extends Controller
             "started_at" => Carbon::parse($request->get("time")["started_at"], "Asia/Muscat"),
             "ended_at" => Carbon::parse($request->get("time")["ended_at"], "Asia/Muscat"),
             "disabled" => true,
-            "price" => 30,
+            "price" => config('reservation.default_price', 30),
             "is_online" => $request->get("type") == ReservationType::ONLINE->value
         ]);
-        $time->Doctor()->associate($request->get("doctor")["id"]);
+        $time->doctor()->associate($request->get("doctor")["id"]);
         $time->save();
         $reservation = $this->reservationRepository->createReservation($customer, [...$request->only(["type"]), "time" => $time->toArray()]);
         return redirect()->route("reservations.show", $reservation);

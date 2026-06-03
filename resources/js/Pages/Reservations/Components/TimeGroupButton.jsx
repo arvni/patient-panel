@@ -17,6 +17,14 @@ const buttonStyle = {
     m:"5px",
     border: "1px solid !important",
     background: "#fff",
+    minHeight: 44, // Mobile-friendly touch target
+    '@media (max-width:900px)': {
+        width: "calc(33.33% - 10px)", // 3 columns on tablet
+    },
+    '@media (max-width:600px)': {
+        width: "calc(50% - 10px)", // 2 columns on mobile
+        paddingX: 2,
+    },
     "&.Mui-selected": {
         background: "#2dc2dd",
     },

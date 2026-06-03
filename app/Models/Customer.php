@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class Customer extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -31,35 +32,41 @@ class Customer extends Authenticatable
      */
     protected $casts = [
         'last_login' => 'datetime',
-        'last_opt_request' => 'datetime',
+        'last_otp_request' => 'datetime',
     ];
 
-    public function Reservations()
+    public function reservations()
     {
         return $this->hasMany(Reservation::class);
     }
 
-    public function Tranactions()
+    public function transactions()
     {
         return $this->hasMany(Transaction::class);
     }
 
-    public function Payments()
+    public function payments()
     {
         return $this->hasMany(Payment::class);
     }
 
-    public function WhatsappMessages()
+    public function whatsappMessages()
     {
         return $this->hasMany(WhatsappMessage::class);
     }
 
-    public function Files()
+    public function files()
     {
         return $this->hasMany(File::class);
     }
-    public function Acceptances()
+
+    public function acceptances()
     {
         return $this->hasMany(Acceptance::class);
+    }
+
+    public function nationalIds()
+    {
+        return $this->hasMany(CustomerNationalId::class);
     }
 }
