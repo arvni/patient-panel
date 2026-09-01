@@ -24,7 +24,7 @@ const AddNationalId = () => {
                                 Add a National ID
                             </Typography>
                             <Typography variant="body2" color="text.secondary" align="center">
-                                Enter the National ID to look up the patient registered under your phone number.
+                                Enter the National ID — or the passport number, if that is what the lab has on file — to look up the patient registered under your phone number.
                             </Typography>
                         </Stack>
 
@@ -34,12 +34,14 @@ const AddNationalId = () => {
                             <Stack spacing={2}>
                                 <TextField
                                     name="national_id"
-                                    label="National ID"
-                                    placeholder="Enter National ID"
+                                    label="National ID / Passport No."
+                                    placeholder="Enter National ID or passport number"
                                     value={data.national_id}
-                                    onChange={(e) => setData("national_id", e.target.value)}
+                                    onChange={(e) => setData("national_id", e.target.value.toUpperCase())}
                                     error={!!errors.national_id}
-                                    inputMode="numeric"
+                                    inputMode="text"
+                                    autoComplete="off"
+                                    inputProps={{autoCapitalize: "characters", spellCheck: false, maxLength: 20}}
                                     autoFocus
                                     required
                                     fullWidth

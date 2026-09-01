@@ -80,11 +80,12 @@ class AcceptanceController extends Controller
     public function lookupNationalId(Request $request)
     {
         $data = $request->validate([
-            "national_id" => ["required", "string", "regex:/^\d{4,20}$/"],
+            "national_id" => ["required", "string", "regex:/^[A-Za-z0-9-]{4,20}$/"],
         ]);
 
         $customer = auth("customer")->user();
-        $nationalId = trim($data["national_id"]);
+        // Normalise case so "a1234567" and "A1234567" are the same patient.
+        $nationalId = strtoupper(trim($data["national_id"]));
 
         $response = ApiService::getAcceptances($customer, $nationalId);
         $patient = $response->ok() ? $response->json("patient") : null;
@@ -112,11 +113,12 @@ class AcceptanceController extends Controller
     public function storeNationalId(Request $request)
     {
         $data = $request->validate([
-            "national_id" => ["required", "string", "regex:/^\d{4,20}$/"],
+            "national_id" => ["required", "string", "regex:/^[A-Za-z0-9-]{4,20}$/"],
         ]);
 
         $customer = auth("customer")->user();
-        $nationalId = trim($data["national_id"]);
+        // Normalise case so "a1234567" and "A1234567" are the same patient.
+        $nationalId = strtoupper(trim($data["national_id"]));
 
         // Re-verify against the lab on submit; never trust a client-supplied
         // name or "exists" flag.
