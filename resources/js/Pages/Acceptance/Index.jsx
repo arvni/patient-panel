@@ -31,13 +31,9 @@ const maskNationalId = (id) => {
     return id.length > 4 ? `••••${id.slice(-4)}` : id;
 }
 
-const getStatusColor = (status) => {
-    const statusLower = status?.toLowerCase() || '';
-    if (statusLower.includes('complete') || statusLower.includes('ready')) return 'success';
-    if (statusLower.includes('pending') || statusLower.includes('process')) return 'warning';
-    if (statusLower.includes('cancelled') || statusLower.includes('rejected')) return 'error';
-    return 'default';
-}
+// Patients only see two states: the lab's internal stages all read as Processing.
+const getStatusColor = (status) => (status === 'reported' ? 'success' : 'warning');
+const statusLabel = (status) => (status === 'reported' ? 'Reported' : 'Processing');
 
 const NationalIdPicker = ({nationalIds, selectedNationalId}) => {
     const pick = (national_id) => () => {
@@ -163,7 +159,7 @@ const Index = ({acceptances, request, nationalIds = [], selectedNationalId = nul
                                                 icon={<Biotech/>}
                                             />
                                             <Chip
-                                                label={acceptance.status || 'Pending'}
+                                                label={statusLabel(acceptance.status)}
                                                 size="small"
                                                 color={getStatusColor(acceptance.status)}
                                             />
@@ -277,7 +273,7 @@ const Index = ({acceptances, request, nationalIds = [], selectedNationalId = nul
                                 </TableCell>
                                 <TableCell>
                                     <Chip
-                                        label={acceptance.status || 'Pending'}
+                                        label={statusLabel(acceptance.status)}
                                         size="small"
                                         color={getStatusColor(acceptance.status)}
                                     />

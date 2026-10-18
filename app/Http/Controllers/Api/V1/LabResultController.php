@@ -39,8 +39,8 @@ class LabResultController extends Controller
                         'date' => $acceptance->created_at->toDateString(),
                         'status' => $acceptance->status,
                         'total_items' => $acceptance->acceptanceItems->count(),
-                        'pending_items' => $acceptance->acceptanceItems->where('status', 'pending')->count(),
-                        'completed_items' => $acceptance->acceptanceItems->where('status', 'completed')->count(),
+                        'pending_items' => $acceptance->acceptanceItems->where('status', Acceptance::PROCESSING)->count(),
+                        'completed_items' => $acceptance->acceptanceItems->where('status', Acceptance::REPORTED)->count(),
                     ];
                 }),
                 'pagination' => [

@@ -33,7 +33,7 @@ class DashboardController extends Controller
 
             // Get pending lab results count
             $pendingLabResults = $user->acceptances()
-                ->where('status', 'pending')
+                ->where('status', \App\Models\Acceptance::PROCESSING)
                 ->count();
 
             // Menu items for dashboard

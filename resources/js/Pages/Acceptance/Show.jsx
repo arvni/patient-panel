@@ -28,28 +28,26 @@ import {
 } from "@mui/material";
 import {useState} from "react";
 import {router} from "@inertiajs/react";
-import {Download, ExpandMore, CheckCircle, Schedule, Science, Assignment} from "@mui/icons-material";
+import {Download, ExpandMore, CheckCircle, Schedule} from "@mui/icons-material";
+
+// Patients only see two states: the lab's internal stages all read as Processing.
+const STEPS = [
+    { label: "Processing", key: "processing", icon: <Schedule /> },
+    { label: "Reported", key: "reported", icon: <CheckCircle /> }
+];
+const isStepDone = (acceptanceItem, step) =>
+    step.key === "processing" || acceptanceItem.status === "reported";
+const statusLabel = (status) => (status === "reported" ? "Reported" : "Processing");
+const getStatusColor = (status) => (status === "reported" ? "success" : "warning");
 
 // Mobile Card Component
 const MobileTestCard = ({acceptanceItem, index}) => {
     const [expanded, setExpanded] = useState(true);
-    const steps = [
-        { label: "Registering", key: 1, icon: <Assignment /> },
-        { label: "Sampling", key: 2, icon: <Science /> },
-        { label: "Processing", key: 3, icon: <Schedule /> },
-        { label: "Reported", key: 4, icon: <CheckCircle /> }
-    ];
+    const steps = STEPS;
 
-    const completedSteps = Object.keys(acceptanceItem.timeline).length;
+    const completedSteps = steps.filter((step) => isStepDone(acceptanceItem, step)).length;
     const progress = (completedSteps / steps.length) * 100;
 
-    const getStatusColor = (status) => {
-        const statusLower = status?.toLowerCase() || '';
-        if (statusLower === 'reported') return 'success';
-        if (statusLower === 'processing') return 'warning';
-        if (statusLower === 'sampling') return 'info';
-        return 'default';
-    };
 
     const handleDownload = () => router.visit(route("acceptanceItems.show", {
         acceptanceItem: acceptanceItem.id,
@@ -78,7 +76,7 @@ const MobileTestCard = ({acceptanceItem, index}) => {
                             </Typography>
                         </Box>
                         <Chip
-                            label={acceptanceItem.status || 'Pending'}
+                            label={statusLabel(acceptanceItem.status)}
                             color={getStatusColor(acceptanceItem.status)}
                             size="small"
                             sx={{ fontWeight: 600 }}
@@ -130,8 +128,7 @@ const MobileTestCard = ({acceptanceItem, index}) => {
                         <Collapse in={expanded}>
                             <Box sx={{ mt: 2 }}>
                                 {steps.map((step, idx) => {
-                                    const isCompleted = acceptanceItem.timeline.hasOwnProperty(step.key);
-                                    const timestamp = acceptanceItem.timeline[step.key];
+                                    const isCompleted = isStepDone(acceptanceItem, step);
 
                                     return (
                                         <Box
@@ -163,11 +160,6 @@ const MobileTestCard = ({acceptanceItem, index}) => {
                                                 >
                                                     {step.label}
                                                 </Typography>
-                                                {timestamp && (
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {timestamp}
-                                                    </Typography>
-                                                )}
                                             </Box>
                                         </Box>
                                     );
@@ -198,22 +190,9 @@ const MobileTestCard = ({acceptanceItem, index}) => {
 // Desktop Table Row Component
 const Row = ({acceptanceItem}) => {
     const [open, setOpen] = useState(true);
-    const steps = [
-        { label: "Registering", key: 1 },
-        { label: "Sampling", key: 2 },
-        { label: "Processing", key: 3 },
-        { label: "Reported", key: 4 }
-    ];
+    const steps = STEPS;
+    const activeStep = acceptanceItem.status === "reported" ? steps.length : 1;
 
-    const activeKey = [1, 2, 3, 4].filter(value => !Object.keys(acceptanceItem.timeline).includes(value + ""))[0];
-
-    const getStatusColor = (status) => {
-        const statusLower = status?.toLowerCase() || '';
-        if (statusLower === 'reported') return 'success';
-        if (statusLower === 'processing') return 'warning';
-        if (statusLower === 'sampling') return 'info';
-        return 'default';
-    };
 
     const handleDownload = () => router.visit(route("acceptanceItems.show", {
         acceptanceItem: acceptanceItem.id,
@@ -238,7 +217,7 @@ const Row = ({acceptanceItem}) => {
             </TableCell>
             <TableCell>
                 <Chip
-                    label={acceptanceItem.status || 'Pending'}
+                    label={statusLabel(acceptanceItem.status)}
                     color={getStatusColor(acceptanceItem.status)}
                     size="small"
                 />
@@ -259,15 +238,11 @@ const Row = ({acceptanceItem}) => {
             <TableCell style={{paddingBottom: 0, paddingTop: 0}} colSpan={3}>
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <Box sx={{ py: 2 }}>
-                        <Stepper nonLinear alternativeLabel activeStep={activeKey - 1}>
+                        <Stepper nonLinear alternativeLabel activeStep={activeStep}>
                             {steps.map((step) => (
-                                <Step key={step.key} completed={acceptanceItem.timeline.hasOwnProperty(step.key)}>
+                                <Step key={step.key} completed={isStepDone(acceptanceItem, step)}>
                                     <StepButton color="inherit">
                                         {step.label}
-                                        <br/>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {acceptanceItem.timeline[step?.key]}
-                                        </Typography>
                                     </StepButton>
                                 </Step>
                             ))}

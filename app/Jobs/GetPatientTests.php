@@ -51,6 +51,10 @@ class GetPatientTests implements ShouldQueue
 
             $acceptanceIds = [];
             foreach ($patient["acceptances"] as $acceptanceData) {
+                // Cancelled acceptances are not shown to patients; leaving them
+                // out of $acceptanceIds also removes any stored copy below.
+                if (Acceptance::isCancelled($acceptanceData["status"] ?? null))
+                    continue;
                 $acceptance = Acceptance::where("server_id", $acceptanceData['id'])->first();
                 if (!$acceptance) {
                     $acceptance = new Acceptance();
@@ -59,7 +63,7 @@ class GetPatientTests implements ShouldQueue
                 $acceptance->fill([
                     "server_id" => $acceptanceData["id"],
                     "national_id" => $this->nationalId,
-                    "status" => $acceptanceData["status"],
+                    "status" => Acceptance::patientStatus($acceptanceData["status"] ?? null),
                     "created_at" => $acceptanceData["created_at"],
                     "updated_at" => $acceptanceData["updated_at"]
                 ]);
@@ -74,10 +78,9 @@ class GetPatientTests implements ShouldQueue
                     $acceptanceItem->fill([
                         "server_id" => $acceptanceItemData["id"],
                         "test" => data_get($acceptanceItemData, "test.name"),
-                        // The lab returns a null status for items whose method
-                        // has no workflow yet; fall back to the earliest state so
-                        // the non-null enum column accepts it.
-                        "status" => data_get($acceptanceItemData, "status") ?? "registering",
+                        // Only "processing" or "reported"; a null status (method with
+                        // no workflow yet) also reads as processing.
+                        "status" => Acceptance::patientStatus(data_get($acceptanceItemData, "status")),
                         "timeline" => $this->convertTimeline($acceptanceItemData["timeline"] ?? []),
                         "report" => isset($acceptanceItemData["report"]) ? $acceptanceItemData["report"]["id"] : null,
                         "created_at" => $acceptanceData["created_at"],

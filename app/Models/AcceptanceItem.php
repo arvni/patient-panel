@@ -22,6 +22,12 @@ class AcceptanceItem extends Model
         "timeline" => "json"
     ];
 
+    // Only "processing" or "reported", as on Acceptance.
+    public function getStatusAttribute($value): string
+    {
+        return Acceptance::patientStatus($value);
+    }
+
     public function Acceptance()
     {
         return $this->belongsTo(Acceptance::class);
