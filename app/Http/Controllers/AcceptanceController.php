@@ -201,5 +201,25 @@ class AcceptanceController extends Controller
         return Response::download(storage_path("app/" . $fileName),$fN);
     }
 
+    /**
+     * The clinical comment the lab added to a report, shown after the report
+     * itself. A 404 means the report has none.
+     */
+    public function clinicalComment(Acceptance $acceptance, AcceptanceItem $acceptanceItem)
+    {
+        abort_if($acceptance->customer_id !== auth()->user()->id || $acceptance->id !== $acceptanceItem->acceptance_id, 403);
+        abort_if($acceptance->status !== "reported", 404);
+        $comment = ApiService::getClinicalComment($acceptanceItem->server_id);
+        abort_unless($comment->ok(), 404);
 
+        $fileName = "clinical-comment";
+        if (preg_match('/filename="?([^";]+)"?/', (string) $comment->header('Content-Disposition'), $matches))
+            $fileName = $matches[1];
+
+        return response($comment->body(), 200, [
+            "Content-Type" => $comment->header('Content-Type') ?: "application/octet-stream",
+            "Content-Disposition" => 'attachment; filename="' . str_replace('"', '', $fileName) . '"',
+            "Cache-Control" => "no-cache, no-store, must-revalidate",
+        ]);
+    }
 }

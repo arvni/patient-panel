@@ -48,6 +48,12 @@ class ApiService
         return self::get($url);
     }
 
+    /** The report's clinical comment, a separate file in the LIS; 404 when there is none. */
+    public static function getClinicalComment($id): PromiseInterface|Response
+    {
+        return self::get(config("api.report_path") . $id . "/clinical-comment");
+    }
+
     public static function getAcceptances(Customer $user, string $nationalId)
     {
         // National ID is mandatory: results are never fetched by phone alone.

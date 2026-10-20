@@ -35,6 +35,7 @@ Route::middleware('auth:customer')->group(function () {
     Route::post("/tests-national-id/select", [AcceptanceController::class, "selectNationalId"])->name("acceptances.nationalId.select");
     Route::get("/tests/{acceptance}", [AcceptanceController::class, "show"])->name("acceptances.show");
     Route::get("tests/{acceptance}/acceptance-items/{acceptanceItem}/report", [AcceptanceController::class, "report"])->name("acceptanceItems.report");
+    Route::get("tests/{acceptance}/acceptance-items/{acceptanceItem}/clinical-comment", [AcceptanceController::class, "clinicalComment"])->name("acceptanceItems.clinicalComment");
     Route::get("tests/{acceptance}/acceptance-items/{acceptanceItem}", ShowAcceptanceItemReportController::class)->name("acceptanceItems.show");
     Route::resource("reservations", ReservationController::class);
     Route::post("reservations/{reservation}/payment", PaymentController::class)
