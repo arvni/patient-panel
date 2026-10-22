@@ -1,6 +1,6 @@
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import {lazy, Suspense, useEffect, useState} from "react";
-import {Box, Button, CircularProgress, Stack, Typography} from "@mui/material";
+import {Badge, Box, Button, CircularProgress, Stack, Tab, Tabs, Typography} from "@mui/material";
 import {saveAs} from 'file-saver';
 
 const PdfViewer = lazy(() => import("@/Pages/Acceptance/Components/PdfViewer"));
@@ -12,12 +12,11 @@ const fileNameOf = (response, fallback) => {
 };
 
 /**
- * One file of the report, loaded once and shown in the page (PDF or image) with its
- * own Download button. With `optional`, a missing file (404) shows nothing at all.
+ * Loads one file of the report once: {state: loading | ready | none | error, file}.
+ * With `optional`, a missing file (404) is "none".
  */
-const ReportFile = ({title, url, fallbackName, optional = false}) => {
-    const [file, setFile] = useState(null);
-    const [state, setState] = useState("loading");
+const useReportFile = (url, fallbackName, optional = false) => {
+    const [result, setResult] = useState({state: "loading", file: null});
 
     useEffect(() => {
         let objectUrl = null;
@@ -26,39 +25,54 @@ const ReportFile = ({title, url, fallbackName, optional = false}) => {
                 const type = response.headers['content-type'] || '';
                 const blob = new Blob([response.data], {type});
                 objectUrl = URL.createObjectURL(blob);
-                setFile({blob, type, name: fileNameOf(response, fallbackName), url: objectUrl});
-                setState("ready");
+                setResult({state: "ready", file: {blob, type, name: fileNameOf(response, fallbackName), url: objectUrl}});
             })
-            .catch(error => setState(optional && error.response?.status === 404 ? "none" : "error"));
+            .catch(error => setResult({state: optional && error.response?.status === 404 ? "none" : "error", file: null}));
         return () => objectUrl && URL.revokeObjectURL(objectUrl);
     }, [url]);
 
-    if (state === "none")
-        return null;
+    return result;
+};
 
-    return <Box sx={{mb: 4}}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{mb: 1}}>
-            <Typography variant="h6">{title}</Typography>
-            <Button variant="outlined" disabled={state !== "ready"} onClick={() => saveAs(file.blob, file.name)}>
-                Download
-            </Button>
-        </Stack>
-        {state === "loading" && <Box sx={{textAlign: "center", py: 4}}><CircularProgress/></Box>}
-        {state === "error" && <Typography color="error">This file couldn't be loaded. Please try again later.</Typography>}
-        {state === "ready" && (file.type.includes("pdf")
-            ? <Suspense fallback={<div>Loading...</div>}><PdfViewer fileUrl={file.url}/></Suspense>
-            : file.type.startsWith("image/")
-                ? <Box component="img" src={file.url} alt={title} sx={{display: "block", maxWidth: "100%", mx: "auto"}}/>
-                : <Typography>Use Download to open this file.</Typography>)}
-    </Box>;
-}
+// One file, shown in the page (PDF or image) with its own Download button.
+const ReportFile = ({title, state, file}) => <Box>
+    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{mb: 1}}>
+        <Typography variant="h6">{title}</Typography>
+        <Button variant="outlined" disabled={state !== "ready"} onClick={() => saveAs(file.blob, file.name)}>
+            Download
+        </Button>
+    </Stack>
+    {state === "loading" && <Box sx={{textAlign: "center", py: 4}}><CircularProgress/></Box>}
+    {state === "error" && <Typography color="error">This file couldn't be loaded. Please try again later.</Typography>}
+    {state === "ready" && (file.type.includes("pdf")
+        ? <Suspense fallback={<div>Loading...</div>}><PdfViewer fileUrl={file.url}/></Suspense>
+        : file.type.startsWith("image/")
+            ? <Box component="img" src={file.url} alt={title} sx={{display: "block", maxWidth: "100%", mx: "auto"}}/>
+            : <Typography>Use Download to open this file.</Typography>)}
+</Box>;
 
+/**
+ * The report and, when the lab added one, its clinical comment as a second tab, so the
+ * comment is one tap away instead of below every page of the report.
+ */
 const Show = ({acceptanceItem}) => {
     const params = {acceptanceItem: acceptanceItem.id, acceptance: acceptanceItem.acceptance_id};
+    const report = useReportFile(route("acceptanceItems.report", params), "report.pdf");
+    const comment = useReportFile(route("acceptanceItems.clinicalComment", params), "clinical-comment.pdf", true);
+    const [tab, setTab] = useState("report");
+    // The tab appears once the comment is known to exist, so tests without one never flicker.
+    const hasComment = comment.state === "ready" || comment.state === "error";
+
     return <>
-        <ReportFile title="Report" url={route("acceptanceItems.report", params)} fallbackName="report.pdf"/>
-        <ReportFile title="Clinical comment" url={route("acceptanceItems.clinicalComment", params)}
-                    fallbackName="clinical-comment.pdf" optional/>
+        {hasComment && <Tabs value={tab} onChange={(e, value) => setTab(value)} variant="fullWidth"
+                             sx={{mb: 2, borderBottom: 1, borderColor: "divider"}}>
+            <Tab value="report" label="Report"/>
+            <Tab value="comment" label={<Badge color="info" variant="dot" invisible={tab === "comment"}
+                                               sx={{"& .MuiBadge-badge": {right: -6}}}>Clinical comment</Badge>}/>
+        </Tabs>}
+        {tab === "comment" && hasComment
+            ? <ReportFile title="Clinical comment" {...comment}/>
+            : <ReportFile title="Report" {...report}/>}
     </>;
 }
 Show.layout = page => <Authenticated head={page.props.acceptanceItem.test + " Test Report"}

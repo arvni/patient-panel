@@ -170,6 +170,12 @@ class AcceptanceController extends Controller
         if ($acceptance->customer_id !== auth("customer")->user()->id)
             abort(403);
         $acceptance->load("AcceptanceItems");
+        // Mark the reports that come with a clinical comment, so the list can say so.
+        $reported = $acceptance->status === Acceptance::REPORTED
+            ? $acceptance->acceptanceItems->where("status", Acceptance::REPORTED) : collect();
+        $comments = $reported->isEmpty() ? [] : ApiService::hasClinicalComments($reported->pluck("server_id")->all());
+        $acceptance->acceptanceItems->each(fn($item) => $item->setAttribute(
+            "has_clinical_comment", $comments[(string) $item->server_id] ?? false));
         return Inertia::render("Acceptance/Show", compact("acceptance"));
     }
 

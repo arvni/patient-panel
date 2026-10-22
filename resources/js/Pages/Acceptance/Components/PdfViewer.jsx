@@ -23,8 +23,10 @@ const PdfJsViewer = ({ fileUrl }) => {
                 if (!container) continue;
                 const containerWidth = container.clientWidth;
 
-                // Adjust scale dynamically for high quality rendering
-                const scale = (containerWidth / page.getViewport({ scale: 1 }).width) * 3;
+                // Sharp on the screen's own pixel density, at most 2x: 3x pages of a long report
+                // used ~65 MB each and left later pages blank on phones.
+                const density = Math.min(window.devicePixelRatio || 1, 2);
+                const scale = (containerWidth / page.getViewport({ scale: 1 }).width) * density;
                 const viewport = page.getViewport({ scale });
 
                 const canvas = canvasRefs.current[pageNum - 1];
@@ -34,8 +36,8 @@ const PdfJsViewer = ({ fileUrl }) => {
                     canvas.height = viewport.height;
 
                     // Scale visually for better quality
-                    canvas.style.width = `${viewport.width / 3}px`;
-                    canvas.style.height = `${viewport.height / 3}px`;
+                    canvas.style.width = `${viewport.width / density}px`;
+                    canvas.style.height = `${viewport.height / density}px`;
 
                     const renderContext = {
                         canvasContext: context,

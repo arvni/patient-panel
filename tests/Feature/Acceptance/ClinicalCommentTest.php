@@ -76,4 +76,38 @@ class ClinicalCommentTest extends TestCase
         $this->actingAs($owner, "customer")->get($this->url($acceptance, $item))->assertNotFound();
         Http::assertNothingSent();
     }
+
+    public function test_the_test_list_marks_reports_that_have_a_comment(): void
+    {
+        Http::fake([
+            "*report-acceptances/5140/clinical-comment" => Http::response("", 200),
+            "*report-acceptances/5142/clinical-comment" => Http::response("", 404),
+        ]);
+        $customer = Customer::create(["name" => "P", "mobile" => "96899125742", "last_otp_request" => now()]);
+        [$acceptance] = $this->reported($customer);
+        $other = new AcceptanceItem(["server_id" => 5142, "test" => "SMA", "status" => "reported", "timeline" => []]);
+        $other->acceptance()->associate($acceptance->id);
+        $other->save();
+
+        $this->actingAs($customer, "customer")->get(route("acceptances.show", $acceptance->id))
+            ->assertOk()
+            ->assertInertia(fn($page) => $page
+                ->where("acceptance.acceptance_items.0.has_clinical_comment", true)
+                ->where("acceptance.acceptance_items.1.has_clinical_comment", false));
+
+        Http::assertSent(fn($request) => $request->method() === "HEAD");
+        Http::assertNotSent(fn($request) => $request->method() === "GET");
+    }
+
+    public function test_an_unanswered_check_shows_no_mark_and_is_asked_again(): void
+    {
+        Http::fake(["*" => Http::response("", 500)]);
+        $customer = Customer::create(["name" => "P", "mobile" => "96899125742", "last_otp_request" => now()]);
+        [$acceptance] = $this->reported($customer);
+
+        $this->actingAs($customer, "customer")->get(route("acceptances.show", $acceptance->id))
+            ->assertOk()
+            ->assertInertia(fn($page) => $page->where("acceptance.acceptance_items.0.has_clinical_comment", false));
+        $this->assertFalse(cache()->has("clinicalComment.5140"));
+    }
 }
