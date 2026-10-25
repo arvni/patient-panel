@@ -28,7 +28,7 @@ import {
 } from "@mui/material";
 import {useState} from "react";
 import {router} from "@inertiajs/react";
-import {Download, ExpandMore, CheckCircle, Schedule} from "@mui/icons-material";
+import {Download, ExpandMore, CheckCircle, Schedule, Comment} from "@mui/icons-material";
 
 // Patients only see two states: the lab's internal stages all read as Processing.
 const STEPS = [
@@ -39,6 +39,11 @@ const isStepDone = (acceptanceItem, step) =>
     step.key === "processing" || acceptanceItem.status === "reported";
 const statusLabel = (status) => (status === "reported" ? "Reported" : "Processing");
 const getStatusColor = (status) => (status === "reported" ? "success" : "warning");
+
+// Tells the patient the report comes with a second file, the lab's clinical comment.
+const ClinicalCommentChip = ({acceptanceItem}) => acceptanceItem.has_clinical_comment
+    ? <Chip icon={<Comment/>} label="+ Clinical comment" color="info" variant="outlined" size="small"/>
+    : null;
 
 // Mobile Card Component
 const MobileTestCard = ({acceptanceItem, index}) => {
@@ -74,6 +79,7 @@ const MobileTestCard = ({acceptanceItem, index}) => {
                             <Typography variant="h6" fontWeight="600" gutterBottom>
                                 {acceptanceItem.test}
                             </Typography>
+                            <ClinicalCommentChip acceptanceItem={acceptanceItem}/>
                         </Box>
                         <Chip
                             label={statusLabel(acceptanceItem.status)}
@@ -214,6 +220,7 @@ const Row = ({acceptanceItem}) => {
                 >
                     {acceptanceItem.test}
                 </Button>
+                <ClinicalCommentChip acceptanceItem={acceptanceItem}/>
             </TableCell>
             <TableCell>
                 <Chip
