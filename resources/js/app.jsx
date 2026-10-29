@@ -11,6 +11,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {ThemeProvider} from '@mui/material/styles';
 
 import theme from "@/theme";
+import ErrorBoundary from "@/Components/ErrorBoundary";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Patient Panel';
 
@@ -24,7 +25,9 @@ createInertiaApp({
             <ThemeProvider theme={theme}>
                 {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
                 <CssBaseline/>
-                <App {...props} />
+                <ErrorBoundary>
+                    <App {...props} />
+                </ErrorBoundary>
             </ThemeProvider>
         </React.StrictMode>);
     },

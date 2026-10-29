@@ -14,7 +14,8 @@ class ShowAcceptanceItemReportController extends Controller
     public function __invoke(Acceptance $acceptance, AcceptanceItem $acceptanceItem)
     {
         abort_if($acceptance->customer_id !== auth()->user()->id || $acceptance->id !== $acceptanceItem->acceptance_id, 403);
-        abort_if($acceptanceItem->Acceptance->status !== "reported", 400, "Report is not Ready yet");
+        // Each test is ready on its own, even while others in the visit are still processing.
+        abort_if($acceptanceItem->status !== Acceptance::REPORTED, 400, "Report is not Ready yet");
         return Inertia::render("Acceptance/Report", [
             "acceptanceItem" => $acceptanceItem,
             "acceptance" => $acceptance,

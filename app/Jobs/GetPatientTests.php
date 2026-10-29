@@ -50,12 +50,14 @@ class GetPatientTests implements ShouldQueue
                 ->update(["name" => $patient["fullName"] ?? null]);
 
             $acceptanceIds = [];
-            foreach ($patient["acceptances"] as $acceptanceData) {
+            foreach ($patient["acceptances"] ?? [] as $acceptanceData) {
                 // Cancelled acceptances are not shown to patients; leaving them
                 // out of $acceptanceIds also removes any stored copy below.
                 if (Acceptance::isCancelled($acceptanceData["status"] ?? null))
                     continue;
-                $acceptance = Acceptance::where("server_id", $acceptanceData['id'])->first();
+                // Each customer keeps their own copy, so syncing one account never
+                // takes a visit away from another account with the same national ID.
+                $acceptance = $user->acceptances()->where("server_id", $acceptanceData['id'])->first();
                 if (!$acceptance) {
                     $acceptance = new Acceptance();
                 }
@@ -71,7 +73,7 @@ class GetPatientTests implements ShouldQueue
                 if ($acceptance->isDirty())
                     $acceptance->save();
                 $ids = [];
-                foreach ($acceptanceData["acceptance_items"] as $acceptanceItemData) {
+                foreach ($acceptanceData["acceptance_items"] ?? [] as $acceptanceItemData) {
                     $acceptanceItem = $acceptance->acceptanceItems()->where("server_id", $acceptanceItemData["id"])->first();
                     if (!$acceptanceItem)
                         $acceptanceItem = new AcceptanceItem();

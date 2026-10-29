@@ -72,7 +72,7 @@ class ClinicalCommentTest extends TestCase
 
         $this->actingAs($other, "customer")->get($this->url($acceptance, $item))->assertForbidden();
 
-        $acceptance->update(["status" => "processing"]);
+        $item->update(["status" => "processing"]);
         $this->actingAs($owner, "customer")->get($this->url($acceptance, $item))->assertNotFound();
         Http::assertNothingSent();
     }

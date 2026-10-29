@@ -171,8 +171,8 @@ class AcceptanceController extends Controller
             abort(403);
         $acceptance->load("AcceptanceItems");
         // Mark the reports that come with a clinical comment, so the list can say so.
-        $reported = $acceptance->status === Acceptance::REPORTED
-            ? $acceptance->acceptanceItems->where("status", Acceptance::REPORTED) : collect();
+        // Each test is ready on its own, even while others in the visit are still processing.
+        $reported = $acceptance->acceptanceItems->where("status", Acceptance::REPORTED);
         $comments = $reported->isEmpty() ? [] : ApiService::hasClinicalComments($reported->pluck("server_id")->all());
         $acceptance->acceptanceItems->each(fn($item) => $item->setAttribute(
             "has_clinical_comment", $comments[(string) $item->server_id] ?? false));
@@ -181,11 +181,11 @@ class AcceptanceController extends Controller
 
     public function report(Acceptance $acceptance,AcceptanceItem $acceptanceItem)
     {
-        $acceptanceItem->load("Acceptance");
-        if ($acceptanceItem->Acceptance->customer_id !== auth()->user()->id)
-            abort(403);
-        $acceptance = $acceptanceItem->Acceptance->id;
+        abort_if($acceptance->customer_id !== auth()->user()->id || $acceptance->id !== $acceptanceItem->acceptance_id, 403);
+        abort_if($acceptanceItem->status !== Acceptance::REPORTED, 404);
+        $acceptance = $acceptance->id;
         $fileName = "Users/" . auth()->user()->id . "/$acceptance/AcceptanceItems/" . $acceptanceItem->id;
+        // The LIS serves a report by its acceptance item id (server_id), not by the report's own id.
         $report = ApiService::getReport($acceptanceItem->server_id);
         if (!$report->ok())
             abort("400", "File not found");
@@ -214,7 +214,7 @@ class AcceptanceController extends Controller
     public function clinicalComment(Acceptance $acceptance, AcceptanceItem $acceptanceItem)
     {
         abort_if($acceptance->customer_id !== auth()->user()->id || $acceptance->id !== $acceptanceItem->acceptance_id, 403);
-        abort_if($acceptance->status !== "reported", 404);
+        abort_if($acceptanceItem->status !== Acceptance::REPORTED, 404);
         $comment = ApiService::getClinicalComment($acceptanceItem->server_id);
         abort_unless($comment->ok(), 404);
 

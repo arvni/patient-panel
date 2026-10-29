@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" translate="no">
     <head>
         <meta charset="utf-8">
+        {{-- Browser translators rewrite React's text nodes and crash the page to a blank screen. --}}
+        <meta name="google" content="notranslate">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
