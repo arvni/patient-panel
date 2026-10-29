@@ -14,13 +14,26 @@ class ApiService
 
     protected static function get($url): PromiseInterface|Response
     {
-        return Http::withToken(self::getApiToken())->timeout(180)->get(config("api.server_url") . $url);
+        return self::send(fn($token) => Http::withToken($token)->timeout(180)->get(config("api.server_url") . $url));
     }
 
 
     protected static function post($url, $data = [])
     {
-        return Http::withToken(self::getApiToken())->timeout(180)->post(config("api.server_url") . $url, $data);
+        return self::send(fn($token) => Http::withToken($token)->timeout(180)->post(config("api.server_url") . $url, $data));
+    }
+
+    /**
+     * Sends with the remembered token; if the LIS has already dropped it (401),
+     * logs in again once and retries, instead of failing until the cache expires.
+     */
+    protected static function send(callable $request): PromiseInterface|Response
+    {
+        $response = $request(self::getApiToken());
+        if ($response->status() !== 401)
+            return $response;
+        Cache::forget("sanctumToken");
+        return $request(self::getApiToken());
     }
 
     public static function getApiToken()
@@ -81,6 +94,8 @@ class ApiService
             $result[$id] = $answered && $response->status() === 200;
             if ($answered)
                 Cache::put("clinicalComment.$id", $result[$id], now()->addMinutes(10));
+            elseif ($response instanceof Response && $response->status() === 401)
+                Cache::forget("sanctumToken");
         }
         return $result;
     }
